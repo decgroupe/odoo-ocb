@@ -93,6 +93,7 @@ Jinja2 = "==2.8.1"
 Python-Chart = "==1.39"
 pyPdf = "==1.13"
 python-ldap = "==2.4.15"
+progressbar2 = "*"
 
 [requires]
 python_version = "2.7"

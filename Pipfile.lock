@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "b5fa374fed3111a6c82712e525b09015052c78efc36afc4c3ac25f52bc8cd8a6"
+            "sha256": "e160c0f7278385e9b00813f6d1b9d331fd7b5ac8222ad3a98ffcea7f21aa0bdf"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -206,7 +206,7 @@
                 "sha256:6bd0f6ad48ec2aa117d3d141940d484deccda84d4fcd884f5c3d93c23ecd8c79",
                 "sha256:8ad8c4783bf61ded74527bffb48ed9b54166685e4230386a9ed9b1279e2df5b1"
             ],
-            "markers": "python_version < '3.4'",
+            "markers": "python_version < '3'",
             "version": "==1.1.6"
         },
         "et-xmlfile": {
@@ -529,6 +529,14 @@
             "index": "pypi",
             "version": "==2.0.0"
         },
+        "progressbar2": {
+            "hashes": [
+                "sha256:570b59a5c60fff31a923ba4eeb10872d6428dd5b084bb1cb7fba786748a096f6",
+                "sha256:6eb5135b987caca4212d2c7abc2923d4ad5ba18bb34ccbe7044b3628f52efc2c"
+            ],
+            "index": "pypi",
+            "version": "==3.39.2"
+        },
         "protobuf": {
             "hashes": [
                 "sha256:df30b98acb6ef892da8b4776175510cff2131908fd0526b6bad960c55a830a1b"
@@ -730,6 +738,13 @@
                 "sha256:caa050aed5d1d4825cc3294c99dc03d498aaf71f4415d659c9fcb58ff0303a5f"
             ],
             "version": "==1.10"
+        },
+        "python-utils": {
+            "hashes": [
+                "sha256:34aaf26b39b0b86628008f2ae0ac001b30e7986a8d303b61e1357dfcdad4f6d3",
+                "sha256:e25f840564554eaded56eaa395bca507b0b9e9f0ae5ecb13a8cb785305c56d25"
+            ],
+            "version": "==2.3.0"
         },
         "pytz": {
             "hashes": [

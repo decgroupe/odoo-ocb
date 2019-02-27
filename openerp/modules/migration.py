@@ -137,8 +137,8 @@ class MigrationManager(object):
         versions = _get_migration_versions(pkg)
 
         for version in versions:
-            if parsed_installed_version < parse_version(convert_version(version)) <= current_version:
-
+            if pkg.data.get('force_migration', False) or parsed_installed_version < parse_version(convert_version(version)) <= current_version:
+                env = os.environ.copy()
                 strfmt = {'addon': pkg.name,
                           'stage': stage,
                           'version': stageformat[stage] % version,

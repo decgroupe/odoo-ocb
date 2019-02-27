@@ -1,0 +1,12 @@
+{
+    //"python.jediEnabled": false,
+    //"python.pythonPath": ".venv/bin/python",
+
+    "files.exclude": {
+        "**/.git": true,         // this is a default value
+        "**/.pyc": true, 
+    },
+    "python.terminal.activateEnvironment": false,
+    "python.pythonPath": ".virtualenv/bin/python",
+    "python.envFile": "${workspaceFolder}/.env"
+}

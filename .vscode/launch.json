@@ -1,0 +1,57 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Kill",
+            "type": "bashdb",
+            "request": "launch",
+            "program": "${workspaceFolder}/_fuser_kill.sh",
+            "args": [
+                "8008",
+            ]
+        },
+        {
+            "name": "Standard Debug",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/openerp-server",
+            "args": [
+                "--config=/media/data/ypa/migration/confs/openerp-server-ocb8.conf",
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Init module",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/openerp-server",
+            "args": [
+                "--config=/media/data/ypa/migration/confs/openerp-server-ocb8.conf",
+                "--init",
+                "dec_city",
+                "-d",
+                "dec_database",
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Update module",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/openerp-server",
+            "args": [
+                "--config=/media/data/ypa/migration/confs/openerp-server-ocb8.conf",
+                "-i",
+                "dec_city",
+                "-u",
+                "dec_city",
+                "-d",
+                "dec_database",
+            ],
+            "console": "integratedTerminal"
+        }
+    ]
+}

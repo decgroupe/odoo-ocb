@@ -2,7 +2,8 @@
 _build/
 
 # dotfiles
-.*
+.git
+.virtualenv
 !.gitignore
 !.mailmap
 # compiled python files
