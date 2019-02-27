@@ -1,0 +1,1 @@
+fuser -n tcp $1 -k
