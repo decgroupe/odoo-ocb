@@ -2,6 +2,7 @@ import re
 import xmlrpc.client
 from datetime import date, datetime
 from xmlrpc.client import dumps, loads
+import base64
 
 from werkzeug.wrappers import Response
 
@@ -63,9 +64,32 @@ class RPC(Controller):
 
     def _xmlrpc(self, service):
         """Common method to handle an XML-RPC request."""
+
+        def fix(res):
+            """
+            This fix is a minor hook to avoid xmlrpclib to raise TypeError exception: 
+            - To respect the XML-RPC protocol, all "int" and "float" keys must be cast to string to avoid
+              TypeError, "dictionary key must be string"
+            - And since "allow_none" is disabled, we replace all None values with a False boolean to avoid
+              TypeError, "cannot marshal None unless allow_none is enabled"
+            """
+            if res is None:
+                return False
+            elif type(res) == dict:
+                return dict((str(key), fix(value)) for key, value in res.items())
+            elif type(res) == list:
+                return [fix(x) for x in res]
+            elif type(res) == tuple:
+                return tuple(fix(x) for x in res)
+            elif type(res) == bytes:
+                return base64.b64encode(res)
+            else:
+                return res
+
         data = request.httprequest.get_data()
         params, method = loads(data)
         result = dispatch_rpc(service, method, params)
+        result = fix(result)
         return dumps((result,), methodresponse=1, allow_none=False)
 
     @route("/xmlrpc/<service>", auth="none", methods=["POST"], csrf=False, save_session=False)
