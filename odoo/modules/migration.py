@@ -95,9 +95,11 @@ class MigrationManager(object):
             }
 
         for pkg in self.graph:
-            if not (hasattr(pkg, 'update') or pkg.state == 'to upgrade' or
-                    getattr(pkg, 'load_state', None) == 'to upgrade'):
-                continue
+            force_migration = pkg.data.get('force_migration', False)
+            if not force_migration:
+                if not (hasattr(pkg, 'update') or pkg.state == 'to upgrade' or
+                        getattr(pkg, 'load_state', None) == 'to upgrade'):
+                    continue
 
             self.migrations[pkg.name] = {
                 'module': get_scripts(get_resource_path(pkg.name, 'migrations')),
@@ -113,8 +115,12 @@ class MigrationManager(object):
         }
         state = pkg.state if stage in ('pre', 'post') else getattr(pkg, 'load_state', None)
 
-        if not (hasattr(pkg, 'update') or state == 'to upgrade') or state == 'to install':
-            return
+        force_migration = pkg.data.get('force_migration', False)
+        if force_migration:
+            pkg.installed_version = force_migration
+        else:
+            if not (hasattr(pkg, 'update') or state == 'to upgrade') or state == 'to install':
+                return
 
         def convert_version(version):
             if version.count('.') >= 2:
@@ -176,9 +182,8 @@ class MigrationManager(object):
                     name, ext = os.path.splitext(os.path.basename(pyfile))
                     if ext.lower() != '.py':
                         continue
-                    mod = None
+                    mod = load_script(pyfile, name)
                     try:
-                        mod = load_script(pyfile, name)
                         _logger.info('module %(addon)s: Running migration %(version)s %(name)s' % dict(strfmt, name=mod.__name__))
                         migrate = mod.migrate
                     except ImportError:
