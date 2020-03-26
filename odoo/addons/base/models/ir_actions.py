@@ -159,8 +159,11 @@ class IrActionsActWindow(models.Model):
     @api.depends('res_model', 'search_view_id')
     def _compute_search_view(self):
         for act in self:
-            fvg = self.env[act.res_model].fields_view_get(act.search_view_id.id, 'search')
-            act.search_view = str(fvg)
+            try:
+                fvg = self.env[act.res_model].fields_view_get(act.search_view_id.id, 'search')
+                act.search_view = str(fvg)
+            except Exception as e:
+                pass
 
     name = fields.Char(string='Action Name', translate=True)
     type = fields.Char(default="ir.actions.act_window")
@@ -755,7 +758,11 @@ class IrActionsActClient(models.Model):
     def _compute_params(self):
         self_bin = self.with_context(bin_size=False, bin_size_params_store=False)
         for record, record_bin in pycompat.izip(self, self_bin):
-            record.params = record_bin.params_store and safe_eval(record_bin.params_store, {'uid': self._uid})
+            try:
+                record.params = record_bin.params_store and safe_eval(record_bin.params_store, {'uid': self._uid})
+            except Exception as e:
+                pass
+            
 
     def _inverse_params(self):
         for record in self:
