@@ -141,6 +141,13 @@ def load_module_graph(cr, graph, status=None, perform_checks=True,
     module_count = len(graph)
     _logger.info('loading %d modules...', module_count)
 
+    # OpenUpgrade: suppress commits to have the upgrade of one module
+    # in just one transaction
+    cr.commit_org = cr.commit
+    cr.commit = lambda *args: None
+    cr.rollback_org = cr.rollback
+    cr.rollback = lambda *args: None
+
     # register, instantiate and initialize models for each modules
     t0 = time.time()
     loading_extra_query_count = odoo.sql_db.sql_counter
@@ -247,7 +254,9 @@ def load_module_graph(cr, graph, status=None, perform_checks=True,
             # need to commit any modification the module's installation or
             # update made to the schema or data so the tests can run
             # (separately in their own transaction)
-            cr.commit()
+            # OpenUpgrade: commit after processing every module as well, for
+            # easier debugging and continuing an interrupted migration
+            cr.commit_org()
 
         updating = tools.config.options['init'] or tools.config.options['update']
         test_time = test_queries = 0
@@ -278,6 +287,10 @@ def load_module_graph(cr, graph, status=None, perform_checks=True,
             ver = adapt_version(package.data['version'])
             # Set new modules and dependencies
             module.write({'state': 'installed', 'latest_version': ver})
+            # OpenUpgrade: commit module_n state and version immediatly
+            # to avoid invalid database state if module_n+1 raises an
+            # exception
+            cr.commit_org()
 
             package.load_state = package.state
             package.load_version = package.installed_version
@@ -312,6 +325,10 @@ def load_module_graph(cr, graph, status=None, perform_checks=True,
                    time.time() - t0,
                    cr.sql_log_count - loading_cursor_query_count,
                    odoo.sql_db.sql_counter - loading_extra_query_count)  # extra queries: testes, notify, any other closed cursor
+
+    # OpenUpgrade: restore commit method
+    cr.commit = cr.commit_org
+    cr.commit()
 
     return loaded_modules, processed_modules
 
