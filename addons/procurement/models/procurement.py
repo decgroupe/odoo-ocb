@@ -126,6 +126,7 @@ class ProcurementOrder(models.Model):
         ('running', 'Running'),
         ('done', 'Done')], string='Status', default='confirmed',
         copy=False, required=True, track_visibility='onchange')
+    move_id = fields.Many2one('stock.move', 'Reservation', oldname='openupgrade_legacy_8_0_move_id')
 
     @api.model
     def _needaction_domain_get(self):

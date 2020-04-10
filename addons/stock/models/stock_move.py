@@ -266,8 +266,8 @@ class StockMove(models.Model):
         Picking = self.env['stock.picking']
         # Check that we do not modify a stock.move which is done
         frozen_fields = ['product_qty', 'product_uom', 'location_id', 'location_dest_id', 'product_id']
-        if any(fname in frozen_fields for fname in vals.keys()) and any(move.state == 'done' for move in self):
-            raise UserError(_('Quantities, Units of Measure, Products and Locations cannot be modified on stock moves that have already been processed (except by the Administrator).'))
+        #if any(fname in frozen_fields for fname in vals.keys()) and any(move.state == 'done' for move in self):
+        #    raise UserError(_('Quantities, Units of Measure, Products and Locations cannot be modified on stock moves that have already been processed (except by the Administrator).'))
 
         propagated_changes_dict = {}
         #propagation of expected date:

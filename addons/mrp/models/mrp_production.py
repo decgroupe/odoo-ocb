@@ -111,6 +111,7 @@ class MrpProduction(models.Model):
         copy=False, oldname='workcenter_lines', readonly=True)
     workorder_count = fields.Integer('# Work Orders', compute='_compute_workorder_count')
     workorder_done_count = fields.Integer('# Done Work Orders', compute='_compute_workorder_done_count')
+    picking_id = fields.Many2one('stock.picking', 'Picking List', oldname='openupgrade_legacy_8_0_picking_id')
 
     state = fields.Selection([
         ('confirmed', 'Confirmed'),
