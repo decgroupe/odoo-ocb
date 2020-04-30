@@ -73,7 +73,7 @@ Dashboard / Reports for MRP will include:
         'board_manufacturing_view.xml',
         'res_config_view.xml',
     ],
-    'demo': ['mrp_demo.xml'],
+    # 'demo': ['mrp_demo.xml'],
     'test': [
          'test/bom_with_service_type_product.yml',
          'test/mrp_users.yml',

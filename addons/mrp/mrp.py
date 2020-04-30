@@ -537,6 +537,8 @@ class mrp_production(osv.osv):
         'cycle_total': fields.function(_production_calc, type='float', string='Total Cycles', multi='workorder', store=True),
         'user_id':fields.many2one('res.users', 'Responsible'),
         'company_id': fields.many2one('res.company','Company',required=True),
+        'move_raw_ids': fields.many2many('stock.move', 'mrp_production_move_ids', 'production_id', 'move_id', 'Products IN'),
+        'move_finished_ids': fields.one2many('stock.move', 'production_id', 'Products OUT'),
     }
     _defaults = {
         'priority': lambda *a: '1',

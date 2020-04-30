@@ -29,6 +29,7 @@ class StockMove(osv.osv):
     
     _columns = {
         'production_id': fields.many2one('mrp.production', 'Production', select=True),
+        'raw_material_production_ids': fields.many2many('mrp.production', 'mrp_production_move_ids', 'move_id','production_id', 'Productions'),
     }
 
     def create_chained_picking(self, cr, uid, moves, context=None):
