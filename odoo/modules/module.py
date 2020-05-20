@@ -130,22 +130,26 @@ def initialize_sys_path():
 
     dd = os.path.normcase(tools.config.addons_data_dir)
     if os.access(dd, os.R_OK) and dd not in ad_paths:
+        _logger.debug("Add %s to addons_path (data_dir)", dd)
         ad_paths.append(dd)
 
     for ad in tools.config['addons_path'].split(','):
         ad = os.path.normcase(os.path.abspath(tools.ustr(ad.strip())))
         if ad not in ad_paths:
+            _logger.debug("Add %s to addons_path", ad)
             ad_paths.append(ad)
 
     # add base module path
     base_path = os.path.normcase(os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'addons')))
     if base_path not in ad_paths and os.path.isdir(base_path):
+        _logger.debug("Add %s to addons_path (base_path)", base_path)
         ad_paths.append(base_path)
 
     # add odoo.addons.__path__
     for ad in __import__('odoo.addons').addons.__path__:
         ad = os.path.abspath(ad)
         if ad not in ad_paths and os.path.isdir(ad):
+            _logger.debug("Add %s to addons_path (odoo.addons.__path__)", ad)
             ad_paths.append(ad)
 
     if not hooked:
