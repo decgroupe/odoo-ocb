@@ -1015,3 +1015,4 @@ class StockMove(models.Model):
     def quants_unreserve(self):
         self.filtered(lambda x: x.partially_available).write({'partially_available': False})
         self.mapped('reserved_quant_ids').sudo().write({'reservation_id': False})
+        return True
