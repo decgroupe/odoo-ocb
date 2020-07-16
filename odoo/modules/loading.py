@@ -233,9 +233,10 @@ def load_module_graph(cr, graph, status=None, perform_checks=True,
             if package.name is not None:
                 registry._init_modules.add(package.name)
 
-            if new_install:
+            if new_install or package.info.get('force_post_init_hook'):
                 post_init = package.info.get('post_init_hook')
                 if post_init:
+                    py_module = sys.modules['odoo.addons.%s' % (module_name,)]
                     getattr(py_module, post_init)(cr, registry)
 
             if mode == 'update':
