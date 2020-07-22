@@ -248,6 +248,7 @@ class MailMail(models.Model):
         for server_id, batch_ids in self._split_by_server():
             smtp_session = None
             try:
+                _logger.info('Connecting to SMTP server')
                 smtp_session = self.env['ir.mail_server'].connect(mail_server_id=server_id)
             except Exception as exc:
                 if raise_exception:
