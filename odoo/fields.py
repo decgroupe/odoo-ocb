@@ -561,6 +561,8 @@ class Field(MetaField('DummyField', (object,), {})):
         # determine the chain of fields, and make sure they are all set up
         target = model
         for name in self.related:
+            if name not in target._fields:
+                _logger.error('Invalid %s, %s is not an existing field from %s', self, name, target)
             field = target._fields[name]
             field.setup_full(target)
             target = target[name]
