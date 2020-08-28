@@ -13,6 +13,9 @@ from odoo.osv import expression
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from odoo.tools.float_utils import float_compare, float_round, float_is_zero
 
+import logging
+_logger = logging.getLogger(__name__)
+
 PROCUREMENT_PRIORITIES = [('0', 'Not urgent'), ('1', 'Normal'), ('2', 'Urgent'), ('3', 'Very Urgent')]
 
 
@@ -763,6 +766,7 @@ class StockMove(models.Model):
         move_to_confirm = self.env['stock.move']
         move_waiting = self.env['stock.move']
 
+        _logger.info("Execute _action_confirm on {}".format(self.ids))
         to_assign = {}
         for move in self:
             # if the move is preceeded, then it's waiting (if preceeding move is done, then action_assign has been called already and its state is already available)
@@ -917,6 +921,8 @@ class StockMove(models.Model):
         equal to its `product_qty`. If it is less, the stock move is considered
         partially available.
         """
+        if self.ids:
+            _logger.info("Execute _action_assign on {}".format(self.ids))
         assigned_moves = self.env['stock.move']
         partially_available_moves = self.env['stock.move']
         # Read the `reserved_availability` field of the moves out of the loop to prevent unwanted
@@ -975,6 +981,7 @@ class StockMove(models.Model):
                     # the reserved quantity on the quants, convert it here in
                     # `product_id.uom_id` (the UOM of the quants is the UOM of the product).
                     move_lines_in = move.move_orig_ids.filtered(lambda m: m.state == 'done').mapped('move_line_ids')
+                    _logger.debug("Check our parents {}".format(move_lines_in.ids))
                     keys_in_groupby = ['location_dest_id', 'lot_id', 'result_package_id', 'owner_id']
 
                     def _keys_in_sorted(ml):
@@ -989,6 +996,7 @@ class StockMove(models.Model):
                     move_lines_out_done = (move.move_orig_ids.mapped('move_dest_ids') - move)\
                         .filtered(lambda m: m.state in ['done'])\
                         .mapped('move_line_ids')
+                    _logger.debug("move_lines_out_done {}".format(move_lines_out_done.ids))
                     # As we defer the write on the stock.move's state at the end of the loop, there
                     # could be moves to consider in what our siblings already took.
                     moves_out_siblings = move.move_orig_ids.mapped('move_dest_ids') - move
@@ -996,6 +1004,10 @@ class StockMove(models.Model):
                     reserved_moves_out_siblings = moves_out_siblings.filtered(lambda m: m.state in ['partially_available', 'assigned'])
                     move_lines_out_reserved = (reserved_moves_out_siblings | moves_out_siblings_to_consider).mapped('move_line_ids')
                     keys_out_groupby = ['location_id', 'lot_id', 'package_id', 'owner_id']
+
+                    _logger.debug("moves_out_siblings_to_consider {}".format(moves_out_siblings_to_consider.ids))
+                    _logger.debug("reserved_moves_out_siblings {}".format(reserved_moves_out_siblings.ids))
+                    _logger.debug("move_lines_out_reserved {}".format(move_lines_out_reserved.ids))
 
                     def _keys_out_sorted(ml):
                         return (ml.location_id.id, ml.lot_id.id, ml.package_id.id, ml.owner_id.id)
@@ -1013,12 +1025,22 @@ class StockMove(models.Model):
                     available_move_lines = dict((k, v) for k, v in available_move_lines.items() if v)
 
                     if not available_move_lines:
+                        _logger.debug("No move lines available")
                         continue
+                    else:
+                        _logger.debug("available_move_lines = {}".format(available_move_lines))
                     for move_line in move.move_line_ids.filtered(lambda m: m.product_qty):
                         if available_move_lines.get((move_line.location_id, move_line.lot_id, move_line.result_package_id, move_line.owner_id)):
                             available_move_lines[(move_line.location_id, move_line.lot_id, move_line.result_package_id, move_line.owner_id)] -= move_line.product_qty
                     for (location_id, lot_id, package_id, owner_id), quantity in available_move_lines.items():
                         need = move.product_qty - sum(move.move_line_ids.mapped('product_qty'))
+                        _logger.debug("need = {}".format(need))
+                        # If we don't need any quantity then reservation has already been done
+                        # (e.g. migration process) so we just set move assigned
+                        if float_is_zero(need, precision_rounding=rounding):
+                            _logger.debug("Adding to move to assign")
+                            assigned_moves |= move
+                            break
                         # `quantity` is what is brought by chained done move lines. We double check
                         # here this quantity is available on the quants themselves. If not, this
                         # could be the result of an inventory adjustment that removed totally of
@@ -1027,15 +1049,28 @@ class StockMove(models.Model):
                         # this case `quantity` is directly the quantity on the quants themselves.
                         available_quantity = self.env['stock.quant']._get_available_quantity(
                             move.product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=True)
+                        ############################################################
+                        # TODO: Check Inconsistency
+                        if available_quantity != move.product_id.virtual_available:
+                            _logger.error('Inconsistent quantity for product %s: %f <> %f', 
+                                move.product_id.display_name,available_quantity, 
+                                move.product_id.virtual_available
+                            )
+                        ############################################################
+                        _logger.debug("available_quantity = {}".format(available_quantity))
                         if float_is_zero(available_quantity, precision_rounding=rounding):
                             continue
                         taken_quantity = move._update_reserved_quantity(need, min(quantity, available_quantity), location_id, lot_id, package_id, owner_id)
+                        _logger.debug("taken_quantity = {}".format(taken_quantity))
                         if float_is_zero(taken_quantity, precision_rounding=rounding):
                             continue
                         if float_is_zero(need - taken_quantity, precision_rounding=rounding):
+                            _logger.debug("Adding to move to assign")
                             assigned_moves |= move
                             break
+                        _logger.debug("Adding to move to set partially available")
                         partially_available_moves |= move
+        _logger.debug("Move lines to create: {}".format(move_line_vals_list)) 
         self.env['stock.move.line'].create(move_line_vals_list)
         partially_available_moves.write({'state': 'partially_available'})
         assigned_moves.write({'state': 'assigned'})
@@ -1124,6 +1159,7 @@ class StockMove(models.Model):
         pass
 
     def _action_done(self):
+        _logger.info("Execute _action_done on {}".format(self.ids))
         self.filtered(lambda move: move.state == 'draft')._action_confirm()  # MRP allows scrapping draft moves
         moves = self.exists().filtered(lambda x: x.state not in ('done', 'cancel'))
         moves_todo = self.env['stock.move']
