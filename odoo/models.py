@@ -5400,7 +5400,16 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         if onchange in ("1", "true"):
             for method in self._onchange_methods.get(field_name, ()):
+                method_name = method.__name__ if hasattr(method, '__name__') else ''
+                _logger.info(
+                    'onchange: %s.%s() (sender=%s)', 
+                    self.__class__.__name__, 
+                    method_name, 
+                    field_name
+                )
+                self._onchange_sender = field_name
                 method_res = method(self)
+                self._onchange_sender = False
                 process(method_res)
             return
 
@@ -5527,6 +5536,8 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             record = self.new(values)
             # attach ``self`` with a different context (for cache consistency)
             record._origin = self.with_context(__onchange=True)
+            record._onchange_origin = False
+            record._onchange_sender = False
 
         # make a snapshot based on the initial values of record
         with env.do_in_onchange():
@@ -5556,6 +5567,9 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 # apply field-specific onchange methods
                 for name in todo:
                     if field_onchange.get(name):
+                        # store name of the first field before event propagation 
+                        if not record._onchange_origin:
+                            record._onchange_origin = name
                         record._onchange_eval(name, field_onchange[name], result)
                     done.add(name)
 
@@ -5565,7 +5579,8 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                     for name in nametree
                     if name not in done and snapshot0.has_changed(name)
                 ]
-
+            # reset origin
+            record._onchange_origin = False
             # make the snapshot with the final values of record
             snapshot1 = Snapshot(record, nametree)
 
