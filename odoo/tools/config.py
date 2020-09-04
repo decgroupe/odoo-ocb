@@ -126,8 +126,8 @@ class configmanager(object):
         group.add_option("-c", "--config", dest="config", help="specify alternate config file")
         group.add_option("-s", "--save", action="store_true", dest="save", default=False,
                           help="save configuration to ~/.odoorc (or to ~/.openerp_serverrc if it exists)")
-        group.add_option("-i", "--init", dest="init", help="install one or more modules (comma-separated list, use \"all\" for all modules), requires -d")
-        group.add_option("-u", "--update", dest="update",
+        group.add_option("-i", "--init", dest="init", action="append", help="install one or more modules (comma-separated list, use \"all\" for all modules), requires -d")
+        group.add_option("-u", "--update", dest="update", action="append",
                           help="update one or more modules (comma-separated list, use \"all\" for all modules). Requires -d.")
         group.add_option("--without-demo", dest="without_demo",
                           help="disable loading demo data for modules to be installed (comma-separated, use \"all\" for all modules). Requires -d and -i. Default is %default",
@@ -277,7 +277,7 @@ class configmanager(object):
                          help="import a CSV or a PO file with translations and exit. The '-l' option is required.")
         group.add_option("--i18n-overwrite", dest="overwrite_existing_translations", action="store_true", my_default=False,
                          help="overwrites existing translation terms on updating a module or importing a CSV or a PO file.")
-        group.add_option("--modules", dest="translate_modules",
+        group.add_option("--modules", dest="translate_modules", action="append",
                          help="specify modules to export. Use in combination with --i18n-export")
         parser.add_option_group(group)
 
@@ -290,7 +290,7 @@ class configmanager(object):
 
         # Advanced options
         group = optparse.OptionGroup(parser, "Advanced options")
-        group.add_option('--dev', dest='dev_mode', type="string",
+        group.add_option('--dev', dest='dev_mode', action="append", type="string",
                          help="Enable developer mode. Param: List of options separated by comma. "
                               "Options : all, [pudb|wdb|ipdb|pdb], reload, qweb, werkzeug, xml")
         group.add_option('--shell-interface', dest='shell_interface', type="string",
@@ -502,27 +502,29 @@ class configmanager(object):
             main_addons = os.path.abspath(os.path.join(self.options['root_path'], '../addons'))
             if os.path.exists(main_addons):
                 default_addons.append(main_addons)
-            self.options['addons_path'] = ','.join(default_addons)
+            self.options['addons_path'] = default_addons
         else:
-            self.options['addons_path'] = ",".join(
-                self._normalize(x)
-                for x in self.options['addons_path'].split(','))
+            self.options['addons_path'] = [
+                    self._normalize(x)
+                    for x in to_list(self.options['addons_path'])]
+
+        self.options['addons_path'] = ','.join(self.options['addons_path'])
 
         self.options["upgrade_path"] = (
             ",".join(self._normalize(x)
-                for x in self.options['upgrade_path'].split(','))
+                for x in to_list(self.options['upgrade_path']))
             if self.options['upgrade_path']
             else ""
         )
 
-        self.options['init'] = opt.init and dict.fromkeys(opt.init.split(','), 1) or {}
+        self.options['init'] = to_dict(opt.init)
         self.options['demo'] = (dict(self.options['init'])
                                 if not self.options['without_demo'] else {})
-        self.options['update'] = opt.update and dict.fromkeys(opt.update.split(','), 1) or {}
-        self.options['translate_modules'] = opt.translate_modules and [m.strip() for m in opt.translate_modules.split(',')] or ['all']
+        self.options['update'] = to_dict(opt.update)
+        self.options['translate_modules'] = to_list(opt.translate_modules) or ['all']
         self.options['translate_modules'].sort()
 
-        dev_split = opt.dev_mode and  [s.strip() for s in opt.dev_mode.split(',')] or []
+        dev_split = to_list(opt.dev_mode)
         self.options['dev_mode'] = 'all' in dev_split and dev_split + ['pdb', 'reload', 'qweb', 'werkzeug', 'xml'] or dev_split
 
         if opt.pg_path:
@@ -537,11 +539,9 @@ class configmanager(object):
         for key in ['data_dir', 'logfile', 'pidfile', 'test_file', 'screencasts', 'screenshots', 'pg_path', 'translate_out', 'translate_in', 'geoip_database']:
             self.options[key] = self._normalize(self.options[key])
 
-        conf.addons_paths = self.options['addons_path'].split(',')
+        conf.addons_paths = to_list(self.options['addons_path'])
 
-        conf.server_wide_modules = [
-            m.strip() for m in self.options['server_wide_modules'].split(',') if m.strip()
-        ]
+        conf.server_wide_modules = to_list(self.options['server_wide_modules'])
 
     def _is_addons_path(self, path):
         from odoo.modules.module import MANIFEST_NAMES
