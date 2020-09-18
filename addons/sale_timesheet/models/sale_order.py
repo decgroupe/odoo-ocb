@@ -221,7 +221,11 @@ class SaleOrderLine(models.Model):
         if self.product_uom.id != company_time_uom_id.id and self.product_uom.category_id.id == company_time_uom_id.category_id.id:
             planned_hours = self.product_uom._compute_quantity(self.product_uom_qty, company_time_uom_id)
         else:
-            planned_hours = self.product_uom_qty
+            uom_hour = self.env.ref('uom.product_uom_hour')
+            if uom_hour and self.product_uom.id != uom_hour.id and self.product_uom.category_id.id == uom_hour.category_id.id:
+                planned_hours = self.product_uom._compute_quantity(self.product_uom_qty, uom_hour)
+            else:
+                planned_hours = self.product_uom_qty
         return planned_hours
 
     @api.multi
