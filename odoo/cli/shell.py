@@ -123,4 +123,4 @@ class Shell(Command):
     def run(self, args):
         self.init(args)
         self.shell(config['db_name'])
-        return 0
+        return 
