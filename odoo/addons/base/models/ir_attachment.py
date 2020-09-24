@@ -198,6 +198,12 @@ class IrAttachment(models.Model):
     def _compute_datas(self):
         bin_size = self._context.get('bin_size')
         for attach in self:
+            if attach.display_name:
+                try:
+                    _logger.info('Read %s (%s) URL=%s', attach.display_name, attach.mimetype, attach.local_url)
+                    _logger.info('res_field=%s res_name=%s res_model=%s (%s)', attach.res_field, attach.res_name, attach.res_model_name, attach.res_model)
+                except:
+                    pass
             if attach.store_fname:
                 attach.datas = self._file_read(attach.store_fname, bin_size)
             else:
