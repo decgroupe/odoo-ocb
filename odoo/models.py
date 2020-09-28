@@ -5664,6 +5664,33 @@ class Model(AbstractModel):
     _abstract = False           # not abstract
     _transient = False          # not transient
 
+    @api.multi
+    def write(self, vals):
+        """
+        When the main language in the company is not English, you cannot change
+        the value of a translatable field in the table if you not switch the
+        client interface to 'en_US', because the new value will be written
+        to ir_translation table instead of the table model.
+
+        This complicates usability, and the default language for "model" values
+        hardcoded as 'en_US' should be configurable
+        (see https://bugs.launchpad.net/openobject-server/+bug/400256).
+
+        With this patch, all changes made in no 'en_US' language will be
+        written in 'en_US' too (in the table model).
+
+        YP: http://bazaar.launchpad.net/~eoc/openobject-server/6.1-overwrite_changes_translatable_fields/revision/4377
+        """
+        result = super().write( vals)
+        if vals and self.env.context.get('lang') != 'en_US':
+            vals_en = {}
+            for field in vals:
+                if field in self._fields and self._fields[field].translate:
+                    vals_en[field] = vals[field]
+            if vals_en:
+                super().with_context(lang='en_US').write(vals_en)
+        return result
+
 class TransientModel(Model):
     """ Model super-class for transient records, meant to be temporarily
     persisted, and regularly vacuum-cleaned.
