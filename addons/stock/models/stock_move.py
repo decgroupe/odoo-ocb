@@ -295,7 +295,14 @@ class StockMove(models.Model):
         result = {data['move_id'][0]: data['product_qty'] for data in 
             self.env['stock.move.line'].read_group([('move_id', 'in', self.ids)], ['move_id','product_qty'], ['move_id'])}
         for rec in self:
-            rec.reserved_availability = rec.product_id.uom_id._compute_quantity(result.get(rec.id, 0.0), rec.product_uom, rounding_method='HALF-UP')
+            try:
+                rec.reserved_availability = rec.product_id.uom_id._compute_quantity(result.get(rec.id, 0.0), rec.product_uom, rounding_method='HALF-UP')
+            except UserError as error:
+                _logger.error('%s: %s', rec.product_id.display_name, error.name)
+                error_extra_informations = _('This error is related to %s of product %s') % (str(rec), rec.product_id.display_name)
+                error.name += '\n' + error_extra_informations
+                error.args = (error.name, error.value)
+                raise error
 
     @api.one
     @api.depends('state', 'product_id', 'product_qty', 'location_id')
