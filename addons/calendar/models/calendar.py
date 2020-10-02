@@ -621,10 +621,15 @@ class Meeting(models.Model):
             # define the correct hour/day asked by the user to repeat for recurrence.
             event_date = event_date.astimezone(timezone)
 
+        # Set a maximum date to avoid very long recursive calculation
+        maxdate = event_date.replace(tzinfo=None) + relativedelta(years=2)
+        
         # The start date is naive
         # the timezone will be applied, if necessary, at the very end of the process
         # to allow for DST timezone reevaluation
-        rset1 = rrule.rrulestr(str(self.rrule), dtstart=event_date.replace(tzinfo=None), forceset=True, ignoretz=True)
+        rule = rrule.rrulestr(str(self.rrule), dtstart=event_date.replace(tzinfo=None), forceset=False) 
+        rset1 = rrule.rruleset()
+        rset1.rrule(rule.between(event_date.replace(tzinfo=None), maxdate, inc=True))
 
         recurring_meetings_ids = self.env.context.get('recurrent_siblings_cache', {}).get(self.id)
         if recurring_meetings_ids is not None:
