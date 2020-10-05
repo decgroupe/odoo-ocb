@@ -33,6 +33,7 @@ import operator
 import pytz
 import re
 import uuid
+import traceback
 from collections import defaultdict, MutableMapping, OrderedDict
 from contextlib import closing
 from inspect import getmembers, currentframe
@@ -2774,6 +2775,8 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             if invalid_fields:
                 _logger.info('Access Denied by ACLs for operation: %s, uid: %s, model: %s, fields: %s',
                     operation, self._uid, self._name, ', '.join(invalid_fields))
+                # Print traceback to log to quickly identify origin of the denied access
+                _logger.warning(''.join(traceback.format_stack()))
                 raise AccessError(
                     _(
                         'The requested operation cannot be completed due to security restrictions. '

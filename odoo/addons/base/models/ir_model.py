@@ -4,6 +4,7 @@ import datetime
 import dateutil
 import logging
 import time
+import traceback
 from collections import defaultdict, Mapping
 
 from odoo import api, fields, models, SUPERUSER_ID, tools,  _
@@ -1307,6 +1308,8 @@ class IrModelAccess(models.Model):
                 msg_params = (model,)
             msg_tail += u' - ({} {}, {} {})'.format(_('Operation:'), mode, _('User:'), self._uid)
             _logger.info('Access Denied by ACLs for operation: %s, uid: %s, model: %s', mode, self._uid, model)
+            # Print traceback to log to quickly identify origin of the denied access
+            _logger.warning(''.join(traceback.format_stack()))
             msg = '%s %s' % (msg_heads[mode], msg_tail)
             raise AccessError(msg % msg_params)
 
