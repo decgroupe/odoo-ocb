@@ -279,7 +279,9 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
     To create a class that should not be instantiated,
     the :attr:`~odoo.models.BaseModel._register` attribute may be set to False.
     """
-    __slots__ = ['env', '_ids', '_prefetch_ids']
+    __slots__ = [
+        'env', '_ids', '_prefetch_ids', '_onchange_sender', '_onchange_origin'
+    ]
 
     _auto = False
     """Whether a database table should be created.
@@ -5565,6 +5567,8 @@ Fields:
             origin = origin.id
         record = self.browse([NewId(origin, ref)])
         record._update_cache(values, validate=False)
+        record._onchange_origin = False
+        record._onchange_sender = False
 
         return record
 
@@ -6044,7 +6048,9 @@ Fields:
 
         if onchange in ("1", "true"):
             for method in self._onchange_methods.get(field_name, ()):
+                self._onchange_sender = field_name
                 method_res = method(self)
+                self._onchange_sender = False
                 process(method_res)
             return
 
@@ -6302,6 +6308,9 @@ Fields:
             # apply field-specific onchange methods
             for name in todo:
                 if field_onchange.get(name):
+                    # store name of the first field before event propagation 
+                    if not record._onchange_origin:
+                        record._onchange_origin = name
                     record._onchange_eval(name, field_onchange[name], result)
                 done.add(name)
 
@@ -6315,6 +6324,8 @@ Fields:
             if not env.context.get('recursive_onchanges', True):
                 todo = []
 
+        # reset origin
+        record._onchange_origin = False
         # make the snapshot with the final values of record
         snapshot1 = Snapshot(record, nametree)
 
