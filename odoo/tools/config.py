@@ -63,6 +63,24 @@ def _deduplicate_loggers(loggers):
         for logger, level in dict(it.split(':') for it in loggers).items()
     )
 
+def to_list(value):
+    res = []
+    if value:
+        if isinstance(value, str):
+            value = value.split(',')
+        for m in value:
+            res += [x.strip() for x in m.split(',') if x.strip()]
+    return res
+
+def to_dict(value):
+    if value:
+        value = to_list(value)
+    if value:
+        res = dict.fromkeys(value, 1)
+    else:
+        res = {}
+    return res
+
 class configmanager(object):
     def __init__(self, fname=None):
         """Constructor.
@@ -379,24 +397,6 @@ class configmanager(object):
         die(not opt.save and opt.config and not os.access(opt.config, os.R_OK),
             "The config file '%s' selected with -c/--config doesn't exist or is not readable, "\
             "use -s/--save if you want to generate it"% opt.config)
-
-        def to_list(value):
-            res = []
-            if value:
-                if isinstance(value, str):
-                    value = value.split(',')
-                for m in value:
-                    res += [x.strip() for x in m.split(',') if x.strip()]
-            return res
-
-        def to_dict(value):
-            if value:
-                value = to_list(value)
-            if value:
-                res = dict.fromkeys(value, 1)
-            else:
-                res = {}
-            return res
 
         # place/search the config file on Win32 near the server installation
         # (../etc from the server)
