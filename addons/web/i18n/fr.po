@@ -1195,7 +1195,7 @@ msgstr "Description"
 #: code:addons/web/static/src/xml/report.xml:18
 #, python-format
 msgid "Discard"
-msgstr "Annuler"
+msgstr "Annuler les modifications"
 
 #. module: web
 #. openerp-web
