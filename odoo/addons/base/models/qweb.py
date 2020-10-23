@@ -291,6 +291,7 @@ class QWeb(object):
 
         element, document = self.get_template(template, options)
         name = element.get('t-name', 'unknown')
+        _logger.info("Compiling %s", name)
 
         _options['template'] = template
         _options['ast_calls'] = []
