@@ -406,6 +406,7 @@ class ProcurementGroup(models.Model):
         and the availability of moves. This function is intended to be run for all the companies at the same time, so
         we run functions as SUPERUSER to avoid intercompanies and access rights issues. """
         try:
+            _logger.info("Run scheduler on %s", self._cr.dbname)
             if use_new_cursor:
                 cr = registry(self._cr.dbname).cursor()
                 self = self.with_env(self.env(cr=cr))  # TDE FIXME
