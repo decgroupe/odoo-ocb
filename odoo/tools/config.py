@@ -135,7 +135,7 @@ class configmanager(object):
         group.add_option("--pidfile", dest="pidfile", help="file where the server pid will be stored")
         group.add_option("--addons-path", dest="addons_path", action="append", type="string",
                          help="specify additional addons paths (separated by commas).")
-        group.add_option("--load", dest="server_wide_modules", action="append", help="Comma-separated list of server-wide modules.", my_default='base,web')
+        group.add_option("--load", dest="server_wide_modules", action="append", help="Comma-separated list of server-wide modules.", type="string", my_default='base,web')
 
         group.add_option("-D", "--data-dir", dest="data_dir", my_default=_get_default_datadir(),
                          help="Directory where to store Odoo data")
@@ -504,6 +504,7 @@ class configmanager(object):
                     for x in to_list(self.options['addons_path'])]
         
         self.options['addons_path'] = ','.join(self.options['addons_path'])
+        #self.options['server_wide_modules'] = ','.join(self.options['server_wide_modules'])
 
         self.options['data_dir'] = self._normalize_path(self.options['data_dir'])
 
