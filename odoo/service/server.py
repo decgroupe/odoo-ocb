@@ -117,6 +117,16 @@ class BaseWSGIServerNoBind(LoggingBaseWSGIServerMixIn, werkzeug.serving.BaseWSGI
 
 
 class RequestHandler(werkzeug.serving.WSGIRequestHandler):
+
+    def address_string(self):
+        forwarded_for = self.headers.get('X-Forwarded-For', '').split(',')
+        # _logger.info('%r', forwarded_for)
+        if forwarded_for and forwarded_for[0]:
+            res = forwarded_for[0]
+        else:
+            res = super().address_string()
+        return res
+
     def setup(self):
         # timeout to avoid chrome headless preconnect during tests
         if config['test_enable'] or config['test_file']:

@@ -131,12 +131,23 @@ except ImportError:
     # werkzeug < 0.15
     from werkzeug.contrib.fixers import ProxyFix
 
+def address_string(self):
+    forwarded_for = self.headers.get('X-Forwarded-For', '').split(',')
+    # _logger.info('%r', forwarded_for)
+    if forwarded_for and forwarded_for[0]:
+        res = forwarded_for[0]
+    else:
+        res = self.client_address[0]
+    return res
+
+
 def application(environ, start_response):
     # FIXME: is checking for the presence of HTTP_X_FORWARDED_HOST really useful?
     #        we're ignoring the user configuration, and that means we won't
     #        support the standardised Forwarded header once werkzeug supports
     #        it
     if config['proxy_mode'] and 'HTTP_X_FORWARDED_HOST' in environ:
+        werkzeug.serving.WSGIRequestHandler.address_string = address_string
         return ProxyFix(application_unproxied)(environ, start_response)
     else:
         return application_unproxied(environ, start_response)
