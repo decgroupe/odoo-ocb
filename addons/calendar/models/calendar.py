@@ -1750,8 +1750,8 @@ class Meeting(models.Model):
         records_to_unlink = self.env['calendar.event'].with_context(recompute=False)
 
         for meeting in self:
-            if can_be_deleted and not is_calendar_id(meeting.id):  # if  ID REAL
-                if meeting.recurrent_id:
+            if (can_be_deleted or not meeting.active) and not is_calendar_id(meeting.id):  # if  ID REAL
+                if meeting.recurrent_id and self.search([('id', '=', meeting.recurrent_id)]).id:
                     records_to_exclude |= meeting
                 else:
                     # int() required because 'id' from calendar view is a string, since it can be calendar virtual id
@@ -1761,6 +1761,7 @@ class Meeting(models.Model):
 
         result = False
         if records_to_unlink:
+            records_to_unlink.write({'rrule' : False})
             result = super(Meeting, records_to_unlink).unlink()
         if records_to_exclude:
             result = records_to_exclude.with_context(dont_notify=True).write({'active': False})

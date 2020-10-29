@@ -433,6 +433,9 @@ class GoogleCalendar(models.AbstractModel):
         event.OE.event_id = res
         meeting = self.env['calendar.event'].browse(res)
         attendee_record = self.env['calendar.attendee'].search([('partner_id', '=', partner_id), ('event_id', '=', res)])
+        for ar in attendee_record:
+            _logger.info("attendee: %s:%s \n -%s \n -%s", ar.common_name, ar.email, ar.access_token, ar.google_internal_event_id)
+        _logger.info("create_from_google: sync attendee %s on %s:%s", attendee_record, meeting, meeting.name)
         # if on GC the user invite n email address which corresponds to contacts merged into a single partner,
         # here the attendee_record will contain n records with same partner_id - event_id
         # We just need to set the google_internal_event_id on the first one
@@ -456,6 +459,7 @@ class GoogleCalendar(models.AbstractModel):
         ResPartner = self.env['res.partner']
         CalendarAlarm = self.env['calendar.alarm']
         attendee_record = []
+        attendee_emails = []
         alarm_record = set()
         partner_record = [(4, self.env.user.partner_id.id)]
         result = {}
@@ -463,32 +467,50 @@ class GoogleCalendar(models.AbstractModel):
         if self.get_need_synchro_attendee():
             for google_attendee in single_event_dict.get('attendees', []):
                 partner_email = google_attendee.get('email')
+                _logger.info('google_partner_email %s', partner_email)
                 if type == "write":
                     for oe_attendee in event['attendee_ids']:
                         if oe_attendee.email == partner_email or partner_email in oe_attendee.partner_id.user_ids.mapped('google_calendar_cal_id'):
-                            oe_attendee.write({'state': google_attendee['responseStatus'], 'google_internal_event_id': single_event_dict.get('id')})
+                            google_internal_event_id = single_event_dict.get('id')
+                            _logger.info('write to oe_attendee %s a google_internal_event_id %s', oe_attendee, google_internal_event_id)
+                            if oe_attendee.google_internal_event_id:
+                                oe_attendee.write({'state': google_attendee['responseStatus']})
+                                if oe_attendee.google_internal_event_id != google_internal_event_id:
+                                    _logger.warning('%s: Event ID has not been updated from %s to %s', oe_attendee, oe_attendee.google_internal_event_id, google_internal_event_id)
+                            else:
+                                oe_attendee.write({'state': google_attendee['responseStatus'], 'google_internal_event_id': google_internal_event_id})
                             google_attendee['found'] = True
                             continue
 
+                _logger.info('google_attendee found')
                 if google_attendee.get('found'):
                     continue
 
                 attendee = ResPartner.search([('user_ids.google_calendar_cal_id', '=ilike', partner_email)], limit=1)
+                if attendee:
+                    _logger.info('attendee found using google_calendar_cal_id')
                 if not attendee:
+                    _logger.info('attendee not found from google_calendar_cal_id')
                     attendee = ResPartner.search([('email', '=ilike', partner_email), ('user_ids', '!=', False)], limit=1)
                 if not attendee:
+                    _logger.info('attendee not found from users_ids and from res_partner partner_email')
                     attendee = ResPartner.search([('email', '=ilike', partner_email)], limit=1)
                 if not attendee:
+                    _logger.info('attendee not found from res_partner partner_email')
                     data = {
                         'email': partner_email,
                         'customer': False,
                         'name': google_attendee.get("displayName", False) or partner_email
                     }
+                    _logger.info('New attendee created %s', data)
                     attendee = ResPartner.create(data)
                 attendee = attendee.read(['email'])[0]
                 partner_record.append((4, attendee.get('id')))
                 attendee['partner_id'] = attendee.pop('id')
                 attendee['state'] = google_attendee['responseStatus']
+                _logger.info('attendee = %s appended', attendee)
+                if attendee['email'] not in attendee_emails:
+                    attendee_emails.append(attendee['email'])
                 attendee_record.append((0, 0, attendee))
         for google_alarm in single_event_dict.get('reminders', {}).get('overrides', []):
             alarm = CalendarAlarm.search(
@@ -663,6 +685,7 @@ class GoogleCalendar(models.AbstractModel):
                 # Deleting duplicate attendee to avoid raising error on constraint google_id_uniq
                 att.unlink()
                 continue
+            # Get the attendees of the same event with google id set
             for other_google_id in other_attendees.mapped('google_internal_event_id'):
                 # Set google id on this attendee
                 if self.get_one_event_synchro(other_google_id):
@@ -710,7 +733,11 @@ class GoogleCalendar(models.AbstractModel):
                 try:
                     status, response, ask_time = self.update_recurrent_event_exclu(new_google_internal_event_id, source_attendee_record.google_internal_event_id, att.event_id)
                     if status_response(status):
-                        att.write({'google_internal_event_id': new_google_internal_event_id})
+                        exist_google_id = self.env['calendar.attendee'].search(
+                            [('google_internal_event_id', '=', new_google_internal_event_id),
+                             ('partner_id', '=', att.partner_id.id), ('event_id', '=', att.event_id.id)])
+                        if not exist_google_id:
+                            att.write({'google_internal_event_id': new_google_internal_event_id})
                         new_ids.append(new_google_internal_event_id)
                         self.env.cr.commit()
                     else:
@@ -909,6 +936,11 @@ class GoogleCalendar(models.AbstractModel):
                         try:
                             # if already deleted from gmail or never created
                             recs.delete_an_event(current_event[0])
+                            # YP: Also delete OE source event if this one is already archived
+                            if event.OE.event_id:
+                                event_id = CalendarEvent.browse(event.OE.event_id)
+                                if not event_id.active:
+                                    event_id.unlink(can_be_deleted=True)
                         except requests.exceptions.HTTPError as e:
                             if e.response.status_code in (401, 410,):
                                 pass
