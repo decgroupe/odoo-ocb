@@ -54,6 +54,8 @@ from .tools import ustr, consteq, frozendict, pycompat, unique, date_utils
 from .modules.module import module_manifest
 
 _logger = logging.getLogger(__name__)
+_json_rpc = logging.getLogger('json.rpc')
+_xml_rpc = logging.getLogger('xml.rpc')
 rpc_request = logging.getLogger(__name__ + '.rpc.request')
 rpc_response = logging.getLogger(__name__ + '.rpc.response')
 
@@ -117,7 +119,34 @@ def dispatch_rpc(service_name, method, params):
             dispatch = odoo.service.db.dispatch
         elif service_name == 'object':
             dispatch = odoo.service.model.dispatch
+            if _xml_rpc.isEnabledFor(logging.DEBUG):
+                ip = request.httprequest.environ['REMOTE_ADDR']
+                if len(params) > 0:
+                    threading.current_thread().dbname = params[0]
+                if len(params) > 1:
+                    login = str(params[1])
+                else:
+                    login = ''
+                if len(params) > 3:
+                    model = params[3]
+                else:
+                    model = ''
+                if len(params) > 4:
+                    function = params[4]
+                else:
+                    function = ''
+                if len(params) > 5:
+                    args = params[5:]
+                else:
+                    args = []
+                #pprint.pformat
+                _xml_rpc.debug('%s@%s: [%s]> %s.%s, %s', login, ip, service_name, model, function, args)
+
         result = dispatch(method, params)
+
+        if service_name == 'object':
+            if _xml_rpc.isEnabledFor(logging.DEBUG):
+                _xml_rpc.debug('%s@%s: [%s]< %s.%s, %s', login, ip, service_name, model, function, result)
 
         if rpc_request_flag or rpc_response_flag:
             end_time = time.time()
@@ -708,6 +737,15 @@ class JsonRequest(WebRequest):
                     rpc_response.debug('%s, %s', logline, pprint.pformat(result))
                 else:
                     rpc_request.debug(logline)
+
+            if _json_rpc.isEnabledFor(logging.DEBUG):
+                endpoint = self.endpoint.method.__name__
+                model = self.params.get('model')
+                method = self.params.get('method')
+                args = self.params.get('args', [])
+                ip = self.httprequest.environ['REMOTE_ADDR']
+                login = self.session.login
+                _json_rpc.debug('%s@%s: [%s]> %s.%s, %s', login, ip, endpoint, model, method, pprint.pformat(args))
 
             return self._json_response(result)
         except Exception as e:
