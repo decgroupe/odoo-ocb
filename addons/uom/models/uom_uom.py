@@ -32,7 +32,7 @@ class UoMCategory(models.Model):
 class UoM(models.Model):
     _name = 'uom.uom'
     _description = 'Product Unit of Measure'
-    _order = "name"
+    _order = "factor desc, name"
 
     name = fields.Char('Unit of Measure', required=True, translate=True)
     category_id = fields.Many2one(
