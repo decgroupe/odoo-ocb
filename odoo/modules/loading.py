@@ -293,6 +293,8 @@ def _check_module_names(cr, module_names):
             cr.execute("SELECT name FROM ir_module_module")
             incorrect_names = mod_names.difference([x['name'] for x in cr.dictfetchall()])
             _logger.warning('invalid module names, ignored: %s', ", ".join(incorrect_names))
+            return False
+    return True
 
 def load_marked_modules(cr, graph, states, force, progressdict, report,
                         loaded_modules, perform_checks, models_to_check=None):
@@ -381,10 +383,12 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
         if update_module:
             env = api.Environment(cr, SUPERUSER_ID, {})
             Module = env['ir.module.module']
-            _logger.info('updating modules list')
-            Module.update_list()
 
-            _check_module_names(cr, itertools.chain(tools.config['init'], tools.config['update']))
+            check_res = _check_module_names(cr, itertools.chain(tools.config['init'], tools.config['update']))
+            if not check_res:
+                _logger.info('force updating modules list')
+                Module.update_list()
+                env.cr.commit()
 
             module_names = [k for k, v in tools.config['init'].items() if v]
             if module_names:
@@ -396,7 +400,7 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
             if module_names:
                 modules = Module.search([('state', '=', 'installed'), ('name', 'in', module_names)])
                 if modules:
-                    modules.button_upgrade()
+                    modules.with_context(ignore_module_list_update=True).button_upgrade()
 
             cr.execute("update ir_module_module set state=%s where name=%s", ('installed', 'base'))
             Module.invalidate_cache(['state'])
