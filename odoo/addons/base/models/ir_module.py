@@ -637,7 +637,8 @@ class Module(models.Model):
         if not self:
             return
         Dependency = self.env['ir.module.module.dependency']
-        self.update_list()
+        if not self.env.context.get('ignore_module_list_update'):
+            self.update_list()
 
         todo = list(self)
         if 'base' in self.mapped('name'):
