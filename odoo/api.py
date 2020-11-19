@@ -739,6 +739,8 @@ def _call_kw_model_create(method, self, args, kwargs):
 
 
 def _call_kw_multi(method, self, args, kwargs):
+    if len(args) < 1:
+        raise UserError('ids argument is missing, please check you method %s' % method)
     ids, args = args[0], args[1:]
     context, args, kwargs = split_context(method, args, kwargs)
     recs = self.with_context(context or {}).browse(ids)
