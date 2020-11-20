@@ -2141,6 +2141,7 @@ class MailThread(models.AbstractModel):
         else:
             views = views_or_xmlid
         if not views:
+            _logger.error('View not found: %s', views_or_xmlid)
             return
         for record in self:
             values['object'] = record
