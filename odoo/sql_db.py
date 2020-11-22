@@ -22,6 +22,12 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT, ISOLATION_LEVEL_READ
 from psycopg2.pool import PoolError
 from werkzeug import urls
 
+try:
+    import pydevd
+    DEBUGGING = True
+except ImportError:
+    DEBUGGING = False
+
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
 
 _logger = logging.getLogger(__name__)
@@ -170,8 +176,8 @@ class Cursor(object):
 
         self._cnx = pool.borrow(dsn)
         self._obj = self._cnx.cursor()
-        if self.sql_log:
-            self.__caller = frame_codeinfo(currentframe(), 2)
+        if self.sql_log or DEBUGGING:
+            self.__caller = frame_codeinfo(currentframe(), 3)
         else:
             self.__caller = False
         self._closed = False   # real initialisation value
