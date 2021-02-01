@@ -74,7 +74,7 @@ class SaleTimesheetController(http.Controller):
 
         # profitability, using profitability SQL report
         profit = dict.fromkeys(['invoiced', 'to_invoice', 'cost', 'expense_cost', 'expense_amount_untaxed_invoiced', 'total'], 0.0)
-        profitability_raw_data = request.env['project.profitability.report'].read_group([('project_id', 'in', projects.ids)], ['project_id', 'amount_untaxed_to_invoice', 'amount_untaxed_invoiced', 'timesheet_cost', 'expense_cost', 'expense_amount_untaxed_invoiced'], ['project_id'])
+        profitability_raw_data = request.env['project.profitability.report'].sudo().read_group([('project_id', 'in', projects.ids)], ['project_id', 'amount_untaxed_to_invoice', 'amount_untaxed_invoiced', 'timesheet_cost', 'expense_cost', 'expense_amount_untaxed_invoiced'], ['project_id'])
         for data in profitability_raw_data:
             profit['invoiced'] += data.get('amount_untaxed_invoiced', 0.0)
             profit['to_invoice'] += data.get('amount_untaxed_to_invoice', 0.0)
