@@ -580,6 +580,9 @@ return AbstractModel.extend({
                     records.unshift(me);
                 }
                 // add all selection
+                if (filter.all === undefined){
+                    filter.all = true;
+                }
                 records.push({
                     'value': 'all',
                     'label': field.relation === 'res.partner' || field.relation === 'res.users' ? _t("Everybody's calendars") : _t("Everything"),
