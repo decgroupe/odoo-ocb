@@ -97,6 +97,8 @@ def _check_olecf(data):
         return 'application/msword'
     # the _xls_pattern stuff doesn't seem to work correctly (the test file
     # only has a bunch of \xf* at offset 0x200), that apparently works
+    elif data.startswith(b'\x09\x08\x10\x00\x00\x06\x05\x00', offset):
+        return 'application/vnd.ms-excel'
     elif b'Microsoft Excel' in data:
         return 'application/vnd.ms-excel'
     elif _ppt_pattern.match(data, offset):
