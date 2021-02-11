@@ -191,6 +191,13 @@ def init_logger():
     logging.getLogger().addHandler(handler)
     logging.getLogger('werkzeug').addFilter(perf_filter)
 
+    if tools.config['logfile']:
+        # YP: Force stdout if logfile is set in order to use journalctl
+        # to access logger and non-logged output at the same place
+        handler = logging.StreamHandler(sys.stdout)
+        handler.setFormatter(ColoredFormatter(format))
+        logging.getLogger().addHandler(handler)
+
     if tools.config['log_db']:
         db_levels = {
             'debug': logging.DEBUG,
