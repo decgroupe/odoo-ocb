@@ -310,7 +310,7 @@ class ProcurementGroup(models.Model):
             raise UserError(_('No procurement rule found in location "%s" for product "%s".\n Check routes configuration.') % (location_id.display_name, product_id.display_name))
         action = 'pull' if rule.action == 'pull_push' else rule.action
         if hasattr(rule, '_run_%s' % action):
-            _logger.info("Execute method _run_{} on {}".format(action, product_id.display_name))
+            _logger.info('\n- Apply rule "{}" from route "{}"\n  Execute method _run_{} on "{}"'.format(rule.name, rule.route_id.name, action, product_id.display_name))
             getattr(rule, '_run_%s' % action)(product_id, product_qty, product_uom, location_id, name, origin, values)
         else:
             _logger.error("The method _run_%s doesn't exist on the procument rules" % action)
