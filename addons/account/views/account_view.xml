@@ -1791,7 +1791,7 @@
                         <label for="option" string=""/> <!--Empty label to force space between elements-->
                         <field name="option" class="oe_inline"/>
                     </div>
-                    <div colspan="2" attrs="{'invisible': [('option','!=', 'day_after_invoice_date')]}">
+                    <div colspan="2" attrs="{'invisible': [('option','not in', ('day_after_invoice_date','after_invoice_month'))]}">
                         <label for="day_of_the_month" string="On the"/>
                         <field name="day_of_the_month" class="oe_inline"/>
                         <span class="o_form_label">of the month</span>
