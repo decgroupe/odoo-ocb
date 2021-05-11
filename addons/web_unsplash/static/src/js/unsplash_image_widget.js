@@ -91,7 +91,7 @@ ImageWidget.include({
         }).then(function (images) {
             _.each(images, function (image) {
                 image.src = image.url;
-                image.isDocument = !(/gif|jpe|jpg|png/.test(image.mimetype));
+                image.isDocument = !(/gif|jpe|jpg|png|svg/.test(image.mimetype));
             });
             self.images = images;
             return _super.apply(self, args);

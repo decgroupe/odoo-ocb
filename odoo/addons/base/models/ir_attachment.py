@@ -471,7 +471,7 @@ class IrAttachment(models.Model):
     def _make_thumbnail(self, vals):
         if vals.get('datas') and not vals.get('res_field'):
             vals['thumbnail'] = False
-            if vals.get('mimetype') and re.match('image.*(gif|jpeg|jpg|png)', vals['mimetype']):
+            if vals.get('mimetype') and re.match('image.*(gif|jpeg|jpg|png|svg)', vals['mimetype']):
                 try:
                     temp_image = crop_image(vals['datas'], type='center', size=(80, 80), ratio=(1, 1))
                     vals['thumbnail'] = image_resize_image(base64_source=temp_image, size=(80, 80),

@@ -396,7 +396,7 @@ var ImageWidget = MediaWidget.extend({
             ['url', '!=', false],
             '|',
             ['mimetype', '=', false],
-            ['mimetype', this.options.document ? 'not in' : 'in', ['image/gif', 'image/jpe', 'image/jpeg', 'image/jpg', 'image/gif', 'image/png']],
+            ['mimetype', this.options.document ? 'not in' : 'in', ['image/gif', 'image/jpe', 'image/jpeg', 'image/jpg', 'image/gif', 'image/png', 'image/svg+xml']],
         ]);
         if (this.needle && this.needle.length) {
             domain.push('|', ['datas_fname', 'ilike', this.needle], ['name', 'ilike', this.needle]);
@@ -422,7 +422,7 @@ var ImageWidget = MediaWidget.extend({
             Array.prototype.splice.apply(self.records, [pageNum * self.IMAGES_PER_PAGE, records.length].concat(records));
             _.each(self.records, function (record) {
                 record.src = record.url || _.str.sprintf('/web/image/%s/%s', record.id, encodeURI(record.name));  // Name is added for SEO purposes
-                record.isDocument = !(/gif|jpe|jpg|png/.test(record.mimetype));
+                record.isDocument = !(/gif|jpe|jpg|png|svg/.test(record.mimetype));
             });
         });
     },
@@ -471,7 +471,7 @@ var ImageWidget = MediaWidget.extend({
         var $divs = this.$('.o_image');
         var imageDefs = _.map($divs, function (el) {
             var $div = $(el);
-            if (/gif|jpe|jpg|png/.test($div.data('mimetype'))) {
+            if (/gif|jpe|jpg|png|svg/.test($div.data('mimetype'))) {
                 var $img = $('<img/>', {
                     class: 'img-fluid',
                     src: $div.data('url') || $div.data('src'),
@@ -531,7 +531,7 @@ var ImageWidget = MediaWidget.extend({
             self.$('.well > div').show();
             _.each(attachments, function (record) {
                 record.src = record.url || _.str.sprintf('/web/image/%s/%s', record.id, encodeURI(record.name)); // Name is added for SEO purposes
-                record.isDocument = !(/gif|jpe|jpg|png/.test(record.mimetype));
+                record.isDocument = !(/gif|jpe|jpg|png|svg/.test(record.mimetype));
             });
             if (error || !attachments.length) {
                 _processFile(null, error || !attachments.length);
