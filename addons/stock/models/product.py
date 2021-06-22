@@ -705,7 +705,7 @@ class UoM(models.Model):
                     ('state', '!=', 'cancel'),
                 ])
 
-                if stock_move_lines:
+                if stock_move_lines and not self.env.context.get('ignore_uom_ratio_warning'):
                     raise UserError(_(
                         "You cannot change the ratio of this unit of mesure as some"
                         " products with this UoM have already been moved or are "
