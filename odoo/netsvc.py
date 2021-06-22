@@ -10,6 +10,8 @@ from . import release
 import sys
 import threading
 import time
+import pytz
+from datetime import datetime
 
 import psycopg2
 
@@ -104,6 +106,27 @@ class DBFormatter(logging.Formatter):
         record.pid = os.getpid()
         record.dbname = getattr(threading.current_thread(), 'dbname', '?')
         return logging.Formatter.format(self, record)
+
+    def converter(self, timestamp):
+        if tools.config.get('timezone'):
+            return datetime.fromtimestamp(timestamp, pytz.timezone(tools.config['timezone']))
+        else:
+            return datetime.fromtimestamp(timestamp)
+
+    def formatTime(self, record, datefmt=None):
+        dt = self.converter(record.created)
+        if datefmt:
+            s = dt.strftime(datefmt)
+        else:
+            try:
+                t = dt.strftime(self.default_time_format)
+            except AttributeError:
+                t = dt.strftime("%Y-%m-%d %H:%M:%S")
+            try:
+                s = self.default_msec_format % (t, record.msecs)
+            except AttributeError:
+                s = "%s,%03d" % (t, record.msecs)
+            return s
 
 class ColoredFormatter(DBFormatter):
     def format(self, record):
