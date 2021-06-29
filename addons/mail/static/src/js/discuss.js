@@ -798,7 +798,7 @@ var Discuss = AbstractAction.extend(ControlPanelMixin, {
         this.$el.addClass('o_mail_selection_mode');
         var message = this.call('mail_service', 'getMessage', messageID);
         this._selectedMessage = message;
-        var subject = "Re: " + message.getDocumentName();
+        var subject = message.getDocumentName();
         this._extendedComposer.setSubject(subject);
 
         if (this._thread.getType() !== 'mailbox') {

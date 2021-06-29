@@ -422,7 +422,7 @@ class Channel(models.Model):
         if self.moderation_notify and self.moderation_notify_msg and message_type in ['email','comment'] and moderation_status == 'pending_moderation':
             self.env['mail.mail'].create({
                 'body_html': self.moderation_notify_msg,
-                'subject': 'Re: %s' % (kwargs.get('subject', '')),
+                'subject': '%s' % (kwargs.get('subject', '')),
                 'email_to': email,
                 'auto_delete': True,
                 'state': 'outgoing'

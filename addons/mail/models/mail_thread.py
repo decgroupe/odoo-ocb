@@ -962,7 +962,7 @@ class MailThread(models.AbstractModel):
         bounce_to = tools.decode_message_header(message, 'Return-Path') or email_from
         bounce_mail_values = {
             'body_html': body_html,
-            'subject': 'Re: %s' % message.get('subject'),
+            'subject': '%s' % message.get('subject'),
             'email_to': bounce_to,
             'auto_delete': True,
         }

@@ -135,7 +135,7 @@ class Partner(models.Model):
             template_ctx = {**base_template_ctx, **group_tpl_values}
             mail_body = base_template.render(template_ctx, engine='ir.qweb', minimal_qcontext=True) if base_template else message.body
             mail_body = self.env['mail.thread']._replace_local_links(mail_body)
-            mail_subject = message.subject or (message.record_name and 'Re: %s' % message.record_name)
+            mail_subject = message.subject or (message.record_name and '%s' % message.record_name)
 
             # send email
             for email_chunk in split_every(50, group_tpl_values['recipients']):
