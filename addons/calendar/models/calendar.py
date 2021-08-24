@@ -627,7 +627,7 @@ class Meeting(models.Model):
         # The start date is naive
         # the timezone will be applied, if necessary, at the very end of the process
         # to allow for DST timezone reevaluation
-        rule = rrule.rrulestr(str(self.rrule), dtstart=event_date.replace(tzinfo=None), forceset=False) 
+        rule = rrule.rrulestr(str(self.rrule), dtstart=event_date.replace(tzinfo=None), forceset=False, ignoretz=True)
         rset1 = rrule.rruleset()
         rset1.rrule(rule.between(event_date.replace(tzinfo=None), maxdate, inc=True))
 
