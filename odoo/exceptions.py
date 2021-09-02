@@ -14,6 +14,7 @@ treated as a 'Server error'.
 
 import logging
 import warnings
+from .tools.stacktrace import print_stacktrace
 
 _logger = logging.getLogger(__name__)
 
@@ -30,6 +31,8 @@ class UserError(Exception):
         :param message: exception message and frontend modal content
         """
         super().__init__(message)
+        print_stacktrace(_logger)
+        _logger.warning(message)
 
     @property
     def name(self):

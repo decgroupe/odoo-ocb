@@ -16,6 +16,7 @@ from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.osv import expression
 from odoo.tools import pycompat, unique, OrderedSet
 from odoo.tools.safe_eval import safe_eval, datetime, dateutil, time
+from odoo.tools.stacktrace import print_stacktrace
 
 _logger = logging.getLogger(__name__)
 
@@ -1821,6 +1822,7 @@ class IrModelAccess(models.Model):
 
             resolution_info = _("Contact your administrator to request access if necessary.")
 
+            print_stacktrace(_logger)
             _logger.info('Access Denied by ACLs for operation: %s, uid: %s, model: %s', mode, self._uid, model)
             msg = """{operation_error}
 

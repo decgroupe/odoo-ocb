@@ -60,6 +60,7 @@ from .tools.config import config
 from .tools.func import frame_codeinfo
 from .tools.misc import CountingStream, clean_context, DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT, get_lang
 from .tools.translate import _
+from .tools.stacktrace import print_stacktrace
 from .tools import date_utils
 from .tools import populate
 from .tools import unique
@@ -2948,6 +2949,8 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         else:
             invalid_fields = {name for name in fields if not valid(name)}
             if invalid_fields:
+                if not config['test_enable']:
+                    print_stacktrace(_logger)
                 _logger.info('Access Denied by ACLs for operation: %s, uid: %s, model: %s, fields: %s',
                              operation, self._uid, self._name, ', '.join(invalid_fields))
 
