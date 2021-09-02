@@ -59,6 +59,7 @@ from .tools.func import frame_codeinfo
 from .tools.misc import CountingStream, clean_context, DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
 from .tools.safe_eval import safe_eval
 from .tools.translate import _
+from .tools.stacktrace import print_stacktrace
 from .tools import date_utils
 
 _logger = logging.getLogger(__name__)
@@ -2785,10 +2786,9 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         else:
             invalid_fields = {name for name in fields if not valid(name)}
             if invalid_fields:
+                print_stacktrace(_logger)
                 _logger.info('Access Denied by ACLs for operation: %s, uid: %s, model: %s, fields: %s',
                     operation, self._uid, self._name, ', '.join(invalid_fields))
-                # Print traceback to log to quickly identify origin of the denied access
-                _logger.warning(''.join(traceback.format_stack()))
                 raise AccessError(
                     _(
                         'The requested operation cannot be completed due to security restrictions. '

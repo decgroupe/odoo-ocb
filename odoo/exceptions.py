@@ -13,6 +13,7 @@ If you consider introducing new exceptions, check out the test_exceptions addon.
 import logging
 from inspect import currentframe
 from .tools.func import frame_codeinfo
+from .tools.stacktrace import print_stacktrace
 
 _logger = logging.getLogger(__name__)
 
@@ -31,6 +32,8 @@ class except_orm(Exception):
 class UserError(except_orm):
     def __init__(self, msg):
         super(UserError, self).__init__(msg, value='')
+        print_stacktrace(_logger)
+        _logger.warning(msg)
 
 
 # deprecated due to collision with builtins, kept for compatibility
@@ -88,6 +91,8 @@ class ValidationError(except_orm):
     Example: When you try to create a new user with a login which already exist in the db."""
     def __init__(self, msg):
         super(ValidationError, self).__init__(msg)
+        print_stacktrace(_logger)
+        _logger.warning(msg)
 
 
 class DeferredException(Exception):

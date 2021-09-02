@@ -4,7 +4,6 @@ import datetime
 import dateutil
 import logging
 import time
-import traceback
 from collections import defaultdict, Mapping
 
 from odoo import api, fields, models, SUPERUSER_ID, tools,  _
@@ -12,6 +11,7 @@ from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.modules.registry import Registry
 from odoo.osv import expression
 from odoo.tools import pycompat
+from odoo.tools.stacktrace import print_stacktrace
 from odoo.tools.safe_eval import safe_eval
 
 _logger = logging.getLogger(__name__)
@@ -1307,9 +1307,8 @@ class IrModelAccess(models.Model):
                 msg_tail = _("Please contact your system administrator if you think this is an error.") + "\n\n(" + _("Document model") + ": %s)"
                 msg_params = (model,)
             msg_tail += u' - ({} {}, {} {})'.format(_('Operation:'), mode, _('User:'), self._uid)
+            print_stacktrace(_logger)
             _logger.info('Access Denied by ACLs for operation: %s, uid: %s, model: %s', mode, self._uid, model)
-            # Print traceback to log to quickly identify origin of the denied access
-            _logger.warning(''.join(traceback.format_stack()))
             msg = '%s %s' % (msg_heads[mode], msg_tail)
             raise AccessError(msg % msg_params)
 
