@@ -286,7 +286,7 @@ class MrpProduction(models.Model):
     @api.depends('move_raw_ids.quantity_done', 'move_raw_ids.product_uom_qty')
     def _compute_consumed_less_than_planned(self):
         for order in self:
-            order.consumed_less_than_planned = any(order.move_raw_ids.filtered(
+            order.consumed_less_than_planned = any(order.move_raw_ids.filtered(lambda m: m.state != 'cancel').filtered(
                 lambda move: float_compare(move.quantity_done,
                                            move.product_uom_qty,
                                            precision_rounding=move.product_uom.rounding) == -1)
