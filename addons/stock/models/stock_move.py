@@ -548,10 +548,10 @@ class StockMove(models.Model):
     def name_get(self):
         res = []
         for move in self:
-            res.append((move.id, '%s%s%s>%s' % (
+            res.append((move.id, '%s%s%s>%s (%d)' % (
                 move.picking_id.origin and '%s/' % move.picking_id.origin or '',
                 move.product_id.code and '%s: ' % move.product_id.code or '',
-                move.location_id.name, move.location_dest_id.name)))
+                move.location_id.name, move.location_dest_id.name, move.id)))
         return res
 
     def write(self, vals):
