@@ -106,7 +106,7 @@ var FieldMany2One = AbstractField.extend({
         'click .o_external_button': '_onExternalButtonClick',
         'click': '_onClick',
     }),
-    AUTOCOMPLETE_DELAY: 200,
+    AUTOCOMPLETE_DELAY: 400,
 
     /**
      * @override
@@ -562,7 +562,7 @@ var FieldMany2One = AbstractField.extend({
      */
     _searchCreatePopup: function (view, ids, context) {
         var self = this;
-        return new dialogs.SelectCreateDialog(this, _.extend({}, this.nodeOptions, {
+        var dialogData = {
             res_model: this.field.relation,
             domain: this.record.getDomain({fieldName: this.name}),
             context: _.extend({}, this.record.getContext(this.recordParams), context || {}),
@@ -575,7 +575,8 @@ var FieldMany2One = AbstractField.extend({
                 self.reinitialize(records[0]);
                 self.activate();
             }
-        })).open();
+        };
+        return new dialogs.SelectCreateDialog(this, _.extend({}, this.nodeOptions, dialogData)).open();
     },
     /**
      * @private
