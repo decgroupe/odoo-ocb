@@ -97,7 +97,7 @@ class MigrationManager(object):
         for pkg in self.graph:
             force_migration = pkg.data.get('force_migration', False)
             if not force_migration:
-                if not (hasattr(pkg, 'update') or pkg.state == 'to upgrade' or
+                if not (hasattr(pkg, 'update') or hasattr(pkg, 'init') or pkg.state == 'to upgrade' or
                         getattr(pkg, 'load_state', None) == 'to upgrade'):
                     continue
 
@@ -119,7 +119,7 @@ class MigrationManager(object):
         if force_migration:
             pkg.installed_version = force_migration
         else:
-            if not (hasattr(pkg, 'update') or state == 'to upgrade') or state == 'to install':
+            if not (hasattr(pkg, 'update') or hasattr(pkg, 'init') or state == 'to upgrade') or state == 'to install':
                 return
 
         def convert_version(version):
