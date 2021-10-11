@@ -371,6 +371,8 @@ class Field(MetaField('DummyField', (object,), {})):
     def __getattr__(self, name):
         """ Access non-slot field attribute. """
         try:
+            if name == "_attrs":
+                raise AttributeError("_attrs")
             return self._attrs[name]
         except KeyError:
             raise AttributeError(name)
@@ -2555,7 +2557,11 @@ class One2many(_RelationalMulti):
         inverse = self.inverse_name
         get_id = (lambda rec: rec.id) if comodel._fields[inverse].type == 'many2one' else int
         domain = self.domain(records) if callable(self.domain) else self.domain
-        domain = domain + [(inverse, 'in', records.ids)]
+        try:
+            domain = domain + [(inverse, 'in', records.ids)]
+        except TypeError:
+            print(domain)
+            raise
         lines = comodel.search(domain, limit=self.limit)
 
         # group lines by inverse field (without prefetching other fields)
