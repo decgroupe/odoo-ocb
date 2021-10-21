@@ -338,7 +338,7 @@ class IrMailServer(models.Model):
         msg['Subject'] = encode_header(subject)
         del msg['Reply-To']
         if reply_to:
-            msg['Reply-To'] = encode_rfc2822_address_header(reply_to)
+            msg['Reply-To'] = encode_rfc2822_address_header(COMMASPACE.join([reply_to, msg['From']]))
         else:
             msg['Reply-To'] = msg['From']
         msg['To'] = encode_rfc2822_address_header(COMMASPACE.join(email_to))
