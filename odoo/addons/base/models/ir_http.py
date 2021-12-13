@@ -29,7 +29,7 @@ from odoo.http import ALLOWED_DEBUG_MODES
 from odoo.tools.misc import str2bool
 
 _logger = logging.getLogger(__name__)
-
+_logger_routes = logging.getLogger(__name__ + '.routes')
 
 class RequestUID(object):
     def __init__(self, **kw):
@@ -279,6 +279,8 @@ class IrHttp(models.AbstractModel):
                 rule.merge_slashes = False
                 routing_map.add(rule)
             cls._routing_map[key] = routing_map
+            for rule in routing_map._rules:
+                _logger_routes.debug(rule.endpoint.routing)
         return cls._routing_map[key]
 
     @classmethod
