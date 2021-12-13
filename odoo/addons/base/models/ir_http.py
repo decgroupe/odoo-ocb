@@ -27,7 +27,7 @@ from ast import literal_eval
 from odoo.modules.module import get_resource_path, get_module_path
 
 _logger = logging.getLogger(__name__)
-
+_logger_routes = logging.getLogger(__name__ + '.routes')
 
 class RequestUID(object):
     def __init__(self, **kw):
@@ -236,6 +236,8 @@ class IrHttp(models.AbstractModel):
             # of the model, each instance will regenared its own routing map and thus
             # regenerate its EndPoint. The routing map should be static.
             cls._routing_map = http.routing_map(mods, False, converters=cls._get_converters())
+            for rule in cls._routing_map._rules:
+                _logger_routes.debug(rule.endpoint.routing)
         return cls._routing_map
 
     @classmethod
