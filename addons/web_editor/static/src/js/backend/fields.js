@@ -148,7 +148,8 @@ var FieldTextHtmlSimple = basic_fields.DebouncedField.extend(TranslatableFieldMi
                 ['para', ['ul', 'ol', 'paragraph']],
                 ['table', ['table']],
                 ['insert', this.nodeOptions['no-attachment'] ? ['link'] : ['link', 'picture']],
-                ['history', ['undo', 'redo']]
+                ['history', ['undo', 'redo']],
+                ['view', ['fullscreen']]
             ],
             prettifyHtml: false,
             styleWithSpan: false,

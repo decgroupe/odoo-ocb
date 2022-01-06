@@ -45,6 +45,7 @@
   left: 0;
   width: 100%;
   z-index: 1050;
+  background-color: white;
   /* bs3 modal-backdrop: 1030, bs2: 1040 */
 }
 .note-editor.fullscreen .note-editable {
