@@ -3700,7 +3700,10 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         columns0 = [('id', "nextval(%s)", self._sequence)]
         if self._log_access:
             columns0.append(('create_uid', "%s", self._uid))
-            columns0.append(('create_date', "%s", AsIs("(now() at time zone 'UTC')")))
+            if self.env.context.get('custom_create_date'):
+                columns0.append(('create_date', "%s", self.env.context.get('custom_create_date')))
+            else:
+                columns0.append(('create_date', "%s", AsIs("(now() at time zone 'UTC')")))
             columns0.append(('write_uid', "%s", self._uid))
             columns0.append(('write_date', "%s", AsIs("(now() at time zone 'UTC')")))
 
