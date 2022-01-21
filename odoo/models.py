@@ -67,6 +67,7 @@ from .tools import unique
 from .tools.lru import LRU
 
 _logger = logging.getLogger(__name__)
+_logger_default = logging.getLogger(__name__ + '.default')
 _schema = logging.getLogger(__name__ + '.schema')
 _unlink = logging.getLogger(__name__ + '.unlink')
 
@@ -1302,6 +1303,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         defaults = {}
         parent_fields = defaultdict(list)
+        _logger_default.debug('Get « %s » defaults', self._name)
         ir_defaults = self.env['ir.default'].get_model_defaults(self._name)
 
         for name in fields_list:
@@ -1309,11 +1311,13 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             key = 'default_' + name
             if key in self._context:
                 defaults[name] = self._context[key]
+                _logger_default.debug('- From context: %s = %s', name, defaults[name])
                 continue
 
             # 2. look up ir.default
             if name in ir_defaults:
                 defaults[name] = ir_defaults[name]
+                _logger_default.debug('- From ir_defaults: %s = %s', name, defaults[name])
                 continue
 
             field = self._fields.get(name)
@@ -1321,6 +1325,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             # 3. look up field.default
             if field and field.default:
                 defaults[name] = field.default(self)
+                _logger_default.debug('- From field: %s = %s', name, defaults[name])
                 continue
 
             # 4. delegate to parent model
@@ -1345,6 +1350,8 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         for model, names in parent_fields.items():
             defaults.update(self.env[model].default_get(names))
 
+        if defaults:
+            _logger_default.debug('- Default values: %s', defaults)
         return defaults
 
     @api.model
