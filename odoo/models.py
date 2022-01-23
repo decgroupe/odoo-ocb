@@ -3314,7 +3314,11 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         _openobject.debug('write(%s, %s) len=%d' % (self._name, vals, len(self)))
         self._check_concurrency()
-        self.check_access_rights('write')
+        try:
+            self.check_access_rights('write')
+        except:
+            _logger.error("Access denied to write %s", vals)
+            raise
 
         bad_names = {'id', 'parent_path'}
         if self._log_access:
