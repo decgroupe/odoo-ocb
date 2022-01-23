@@ -44,6 +44,7 @@
         <script type="text/javascript" t-attf-src="/web_editor/static/lib/summernote/src/js/{{ file }}.js"></script>
     </t>
     <script type="text/javascript" src="/web_editor/static/src/js/editor/summernote.js" />
+    <script type="text/javascript" src="/web_editor/static/src/js/editor/summernote-ext-toggleclass.js" />
     <script type="text/javascript">
         window.define = odoo.__define__;
         delete odoo.__define__;

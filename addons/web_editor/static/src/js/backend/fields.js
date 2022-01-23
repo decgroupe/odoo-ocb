@@ -141,7 +141,7 @@ var FieldTextHtmlSimple = basic_fields.DebouncedField.extend(TranslatableFieldMi
             focus: false,
             height: 180,
             toolbar: [
-                ['style', ['style']],
+                ['style', ['style', 'toggleClassDropdown']],
                 ['font', ['bold', 'italic', 'underline', 'clear']],
                 ['fontsize', ['fontsize']],
                 ['color', ['color']],
