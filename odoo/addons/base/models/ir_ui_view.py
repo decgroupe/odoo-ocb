@@ -668,6 +668,12 @@ actual arch.
                 continue
             node = self.locate_node(source, spec)
             if node is not None:
+                if 'position' not in spec:
+                    _logger.warning(
+                        "%s: Missing 'position' attribute at line %d "
+                        "for tag '%s': fallback to 'inside' mode",
+                        self.arch_fs or self.key or str(self),
+                        node.sourceline, node.tag, )
                 pos = spec.get('position', 'inside')
                 if pos == 'replace':
                     for loc in spec.xpath(".//*[text()='$0']"):
