@@ -70,6 +70,8 @@ class AccessError(except_orm):
     Example: When you try to read a record that you are not allowed to."""
     def __init__(self, msg):
         super(AccessError, self).__init__(msg)
+        print_stacktrace(_logger)
+        _logger.warning(msg)
 
 
 class CacheMiss(except_orm, KeyError):
@@ -84,6 +86,8 @@ class MissingError(except_orm):
     Example: When you try to write on a deleted record."""
     def __init__(self, msg):
         super(MissingError, self).__init__(msg)
+        print_stacktrace(_logger)
+        _logger.warning(msg)
 
 
 class ValidationError(except_orm):
