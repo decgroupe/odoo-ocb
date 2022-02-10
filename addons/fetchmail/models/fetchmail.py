@@ -109,18 +109,20 @@ class FetchmailServer(models.Model):
                 connection = IMAP4_SSL(self.server, int(self.port))
             else:
                 connection = IMAP4(self.server, int(self.port))
+            # Add timeout on socket
+            connection.sock.settimeout(MAIL_TIMEOUT)
             connection.login(self.user, self.password)
         elif self.type == 'pop':
             if self.is_ssl:
                 connection = POP3_SSL(self.server, int(self.port))
             else:
                 connection = POP3(self.server, int(self.port))
+            # Add timeout on socket
+            connection.sock.settimeout(MAIL_TIMEOUT)
             #TODO: use this to remove only unread messages
             #connection.user("recent:"+server.user)
             connection.user(self.user)
             connection.pass_(self.password)
-        # Add timeout on socket
-        connection.sock.settimeout(MAIL_TIMEOUT)
         return connection
 
     @api.multi
