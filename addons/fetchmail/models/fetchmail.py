@@ -112,12 +112,16 @@ odoo_mailgate: "|/path/to/odoo-mailgate.py --host=localhost -u %(uid)d -p PASSWO
                 connection = IMAP4_SSL(self.server, int(self.port))
             else:
                 connection = IMAP4(self.server, int(self.port))
+            # Add timeout on socket
+            connection.sock.settimeout(MAIL_TIMEOUT)
             self._imap_login(connection)
         elif self.server_type == 'pop':
             if self.is_ssl:
                 connection = POP3_SSL(self.server, int(self.port), timeout=MAIL_TIMEOUT)
             else:
                 connection = POP3(self.server, int(self.port), timeout=MAIL_TIMEOUT)
+            # Add timeout on socket
+            connection.sock.settimeout(MAIL_TIMEOUT)
             #TODO: use this to remove only unread messages
             #connection.user("recent:"+server.user)
             connection.user(self.user)
