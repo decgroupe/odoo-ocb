@@ -58,12 +58,12 @@ var ListRenderer = BasicRenderer.extend({
         // and on which field it is set.
         this.handleField = null;
         this._processColumns(params.columnInvisibleFields || {});
-        this.rowDecorations = _.chain(this.arch.attrs)
-            .pick(function (value, key) {
-                return DECORATIONS.indexOf(key) >= 0;
-            }).mapObject(function (value) {
-                return py.parse(py.tokenize(value));
-            }).value();
+        this.rowDecorations = this._extractDecorationAttrs(this.arch);
+        this.fieldDecorations = {};
+        for (const field of this.arch.children.filter(c => c.tag === 'field')) {
+            const decorations = this._extractDecorationAttrs(field);
+            this.fieldDecorations[field.attrs.name] = decorations;
+        }
         this.hasSelectors = params.hasSelectors;
         this.selection = params.selectedRecords || [];
         this.pagers = []; // instantiated pagers (only for grouped lists)
@@ -169,6 +169,24 @@ var ListRenderer = BasicRenderer.extend({
                 value: aggregateValue,
             };
         }
+    },
+    /**
+     * Extract the decoration attributes (e.g. decoration-danger) of a node. The
+     * condition is processed such that it is ready to be evaluated.
+     *
+     * @private
+     * @param {Object} node the <tree> or a <field> node
+     * @returns {Object}
+     */
+    _extractDecorationAttrs: function (node) {
+        const decorations = {};
+        for (const [key, expr] of Object.entries(node.attrs)) {
+            if (DECORATIONS.includes(key)) {
+                const cssClass = key.replace('decoration', 'text');
+                decorations[cssClass] = py.parse(py.tokenize(expr));
+            }
+        }
+        return decorations;
     },
     /**
      * return the number of visible columns.  Note that this number depends on
@@ -313,6 +331,7 @@ var ListRenderer = BasicRenderer.extend({
             this._handleAttributes($el, node);
             return $td.append($el);
         }
+        this._setDecorationClasses(record, $td, this.fieldDecorations[node.attrs.name]);
         var name = node.attrs.name;
         var field = this.state.fields[name];
         var value = record.data[name];
@@ -602,7 +621,7 @@ var ListRenderer = BasicRenderer.extend({
         if (this.hasSelectors) {
             $tr.prepend(this._renderSelector('td', !record.res_id));
         }
-        this._setDecorationClasses(record, $tr);
+        this._setDecorationClasses(record, $tr, this.rowDecorations);
         return $tr;
     },
     /**
@@ -702,11 +721,14 @@ var ListRenderer = BasicRenderer.extend({
      * @param {Object} record a basic model record
      * @param {jQueryElement} $tr a jquery <tr> element (the row to add decoration)
      */
-    _setDecorationClasses: function (record, $tr) {
-        _.each(this.rowDecorations, function (expr, decoration) {
-            var cssClass = decoration.replace('decoration', 'text');
-            $tr.toggleClass(cssClass, py.PY_isTrue(py.evaluate(expr, record.evalContext)));
-        });
+    _setDecorationClasses: function (record, $el, decorations) {
+        for (const [cssClass, expr] of Object.entries(decorations)) {
+            $el.toggleClass(cssClass, py.PY_isTrue(py.evaluate(expr, record.evalContext)));
+        }
+        // _.each(this.rowDecorations, function (expr, decoration) {
+        //     var cssClass = decoration.replace('decoration', 'text');
+        //     $tr.toggleClass(cssClass, py.PY_isTrue(py.evaluate(expr, record.evalContext)));
+        // });
     },
     /**
      * Update the footer aggregate values.  This method should be called each
