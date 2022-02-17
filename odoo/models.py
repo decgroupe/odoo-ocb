@@ -575,7 +575,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         # create or retrieve the model's class
         if name in parents:
             if name not in pool:
-                raise TypeError("Model %r does not exist in registry." % name)
+                raise TypeError("Model %r (module: %s) does not exist in registry." % (name, cls._module))
             ModelClass = pool[name]
             ModelClass._build_model_check_base(cls)
             check_parent = ModelClass._build_model_check_parent
