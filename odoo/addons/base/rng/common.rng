@@ -265,6 +265,16 @@
             <rng:optional><rng:attribute name="text" /></rng:optional>
             <rng:optional><rng:attribute name="optional" /></rng:optional>
             <rng:optional><rng:attribute name="kanban_view_ref" /></rng:optional>
+            <rng:optional><rng:attribute name="decoration-bf"/></rng:optional>
+            <rng:optional><rng:attribute name="decoration-it"/></rng:optional>
+            <rng:optional><rng:attribute name="decoration-danger"/></rng:optional>
+            <rng:optional><rng:attribute name="decoration-info"/></rng:optional>
+            <rng:optional><rng:attribute name="decoration-muted"/></rng:optional>
+            <rng:optional><rng:attribute name="decoration-primary"/></rng:optional>
+            <rng:optional><rng:attribute name="decoration-success"/></rng:optional>
+            <rng:optional><rng:attribute name="decoration-warning"/></rng:optional>
+            <rng:optional><rng:attribute name="decoration-muted-strike"/></rng:optional>
+            <rng:optional><rng:attribute name="decoration-strike"/></rng:optional>
             <rng:optional>
                 <rng:attribute name="force_save">
                     <rng:choice>
