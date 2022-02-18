@@ -801,6 +801,8 @@ class Environment(Mapping):
     def __new__(cls, cr, uid, context):
         assert context is not None
         args = (cr, uid, context)
+        if context:
+            _logger.debug("Context is %s", context)
 
         # if env already exists, return it
         env, envs = None, cls.envs
