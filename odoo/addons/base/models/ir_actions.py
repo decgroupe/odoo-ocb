@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from email.policy import default
 import odoo
 from odoo import api, fields, models, tools, SUPERUSER_ID, _
 from odoo.exceptions import MissingError, UserError, ValidationError, AccessError
@@ -275,7 +276,7 @@ class IrActionsActWindowView(models.Model):
     _rec_name = 'view_id'
     _order = 'sequence,id'
 
-    sequence = fields.Integer()
+    sequence = fields.Integer(default=0)
     view_id = fields.Many2one('ir.ui.view', string='View')
     view_mode = fields.Selection(VIEW_TYPES, string='View Type', required=True)
     act_window_id = fields.Many2one('ir.actions.act_window', string='Action', ondelete='cascade')
