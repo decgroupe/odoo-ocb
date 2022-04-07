@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import logging
+
 from odoo import _, api, exceptions, fields, models, modules
 from odoo.addons.base.models.res_users import is_selection_groups
 
+_logger = logging.getLogger(__name__)
 
 class Users(models.Model):
     """ Update of res.users class
@@ -128,6 +131,12 @@ GROUP BY channel_moderator.res_users_id""", [tuple(self.ids)])
 
         user_activities = {}
         for activity in activity_data:
+            if not activity['model']:
+                _logger.error(
+                    "An activity linked to `res_model_id=%d` does "
+                    "not have a `res_model`", activity['id']
+                )
+                continue
             if not user_activities.get(activity['model']):
                 user_activities[activity['model']] = {
                     'name': model_names[activity['id']],
