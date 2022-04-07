@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import logging
 from collections import defaultdict
 
 from odoo import _, api, exceptions, fields, models, modules
 from odoo.addons.base.models.res_users import is_selection_groups
 
+_logger = logging.getLogger(__name__)
 
 class Users(models.Model):
     """ Update of res.users class
@@ -117,6 +119,11 @@ GROUP BY channel_moderator.res_users_id""", [tuple(self.ids)])
 
     @api.model
     def systray_get_activities(self):
+        # TODO: Add a check
+        # _logger.error(
+        #     "An activity linked to `res_model_id=%d` does "
+        #     "not have a `res_model`", activity.res_id
+        # )
         query = """SELECT array_agg(res_id) as res_ids, m.id, count(*),
                     CASE
                         WHEN %(today)s::date - act.date_deadline::date = 0 Then 'today'
