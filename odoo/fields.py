@@ -455,13 +455,15 @@ class Field(MetaField('DummyField', (object,), {})):
         # initialize ``self`` with ``attrs``
         if attrs.get('compute'):
             # by default, computed fields are not stored, not copied and readonly
-            attrs['store'] = attrs.get('store', False)
+            attrs['store'] = store = attrs.get('store', False)
+            attrs['compute_sudo'] = attrs.get('compute_sudo', store)
             attrs['copy'] = attrs.get('copy', False)
             attrs['readonly'] = attrs.get('readonly', not attrs.get('inverse'))
             attrs['context_dependent'] = attrs.get('context_dependent', True)
         if attrs.get('related'):
             # by default, related fields are not stored and not copied
             attrs['store'] = attrs.get('store', False)
+            attrs['compute_sudo'] = attrs.get('compute_sudo', attrs.get('related_sudo', True))
             attrs['copy'] = attrs.get('copy', False)
             attrs['readonly'] = attrs.get('readonly', True)
         if attrs.get('company_dependent'):

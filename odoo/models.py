@@ -5361,10 +5361,14 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 for vals, ids in updates.items():
                     target = recs.browse(ids)
                     try:
+                        _logger.debug("Recompute stored function fields %s", vals)
                         target._write(dict(vals))
                     except MissingError:
                         # retry without missing records
                         target.exists()._write(dict(vals))
+                    except AccessError:
+                        _logger.error("FAIL: Recompute stored function fields %s for model %s", vals, target._name)
+                        raise
 
             # mark computed fields as done
             for f in fs:
