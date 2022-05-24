@@ -368,7 +368,8 @@ class MailActivity(models.Model):
                 else:
                     activity.action_notify()
 
-        self.env[activity.res_model].browse(activity.res_id).message_subscribe(partner_ids=[partner_id])
+        if not self.env.context.get('mail_activity_noautofollow'):
+            self.env[activity.res_model].browse(activity.res_id).message_subscribe(partner_ids=[partner_id])
         if activity.date_deadline <= fields.Date.today():
             self.env['bus.bus'].sendone(
                 (self._cr.dbname, 'res.partner', activity.user_id.partner_id.id),
@@ -388,7 +389,8 @@ class MailActivity(models.Model):
                 if not self.env.context.get('mail_activity_quick_update', False):
                     user_changes.action_notify()
             for activity in user_changes:
-                self.env[activity.res_model].browse(activity.res_id).message_subscribe(partner_ids=[activity.user_id.partner_id.id])
+                if not self.env.context.get('mail_activity_noautofollow'):
+                    self.env[activity.res_model].browse(activity.res_id).message_subscribe(partner_ids=[activity.user_id.partner_id.id])
                 if activity.date_deadline <= fields.Date.today():
                     self.env['bus.bus'].sendone(
                         (self._cr.dbname, 'res.partner', activity.user_id.partner_id.id),
