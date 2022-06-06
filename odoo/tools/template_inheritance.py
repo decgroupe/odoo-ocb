@@ -201,6 +201,8 @@ def apply_inheritance_specs(source, specs_tree, inherit_branding=False, pre_loca
                     if child.get('position') == 'move':
                         child = extract(child)
                     node.append(child)
+            elif pos == 'text':
+                node.text = spec.text
             elif pos == 'after':
                 # add a sentinel element right after node, insert content of
                 # spec before the sentinel, then remove the sentinel element
