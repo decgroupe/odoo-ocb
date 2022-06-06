@@ -668,12 +668,6 @@ actual arch.
                 continue
             node = self.locate_node(source, spec)
             if node is not None:
-                if 'position' not in spec:
-                    _logger.warning(
-                        "%s: Missing 'position' attribute at line %d "
-                        "for tag '%s': fallback to 'inside' mode",
-                        self.arch_fs or self.key or str(self),
-                        node.sourceline, node.tag, )
                 pos = spec.get('position', 'inside')
                 if pos == 'replace':
                     for loc in spec.xpath(".//*[text()='$0']"):
@@ -726,6 +720,8 @@ actual arch.
                         if child.get('position') == 'move':
                             child = extract(child)
                         node.append(child)
+                elif pos == 'text':
+                    node.text = spec.text
                 elif pos == 'after':
                     # add a sentinel element right after node, insert content of
                     # spec before the sentinel, then remove the sentinel element
