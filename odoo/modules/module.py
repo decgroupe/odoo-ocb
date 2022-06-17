@@ -317,6 +317,7 @@ def load_information_from_description_file(module, mod_path=None):
             'auto_install': False,
             'category': 'Uncategorized',
             'depends': [],
+            'soft_depends': [],
             'description': '',
             'icon': get_module_icon(module),
             'installable': True,
@@ -325,6 +326,7 @@ def load_information_from_description_file(module, mod_path=None):
             'version': '1.0',
             'web': False,
             'sequence': 100,
+            'loading_priority': 0,
             'summary': '',
             'website': '',
         }

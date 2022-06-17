@@ -68,12 +68,20 @@ class Graph(dict):
             elif module != 'studio_customization':
                 _logger.warning('module %s: not installable, skipped', module)
 
+        # sort packages (priority, name) to ensure consistent loading
+        packages.sort(key=lambda x: (-x[1]['loading_priority'], x[0]))
+
         dependencies = dict([(p, info['depends']) for p, info in packages])
         current, later = set([p for p, info in packages]), set()
 
         while packages and current > later:
             package, info = packages[0]
             deps = info['depends']
+
+            # add soft dependencies only if these modules exists
+            available_deps = [x for x in info['soft_depends'] if x in dependencies]
+            if available_deps:
+                deps = deps + available_deps
 
             # if all dependencies of 'package' are already in the graph, add 'package' in the graph
             if all(dep in self for dep in deps):
