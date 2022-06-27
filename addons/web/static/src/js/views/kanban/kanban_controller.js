@@ -51,12 +51,14 @@ var KanbanController = BasicController.extend({
     // Public
     //--------------------------------------------------------------------------
 
+    buttons_template: 'KanbanView.buttons',
+
     /**
      * @param {jQueryElement} $node
      */
     renderButtons: function ($node) {
         if (this.hasButtons && this.is_action_enabled('create')) {
-            this.$buttons = $(qweb.render('KanbanView.buttons', {
+            this.$buttons = $(qweb.render(this.buttons_template, {
                 btnClass: 'btn-primary',
                 widget: this,
             }));
