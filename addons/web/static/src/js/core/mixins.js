@@ -3,6 +3,7 @@ odoo.define('web.mixins', function (require) {
 
 var Class = require('web.Class');
 var utils = require('web.utils');
+var config = require('web.config');
 
 /**
  * Mixin to structure objects' life-cycles folowing a parent-children
@@ -270,13 +271,17 @@ var EventDispatcherMixin = _.extend({}, ParentedMixin, {
      */
     proxy: function (method) {
         var self = this;
-        console.log("Proxy ⏺️", method);
+        if (config.debug) {
+            console.log("Proxy ⏺️", method);
+        }
         return function () {
             var fn = (typeof method === 'string') ? self[method] : method;
             if (fn === void 0) {
                 throw new Error("Couldn't find method '" + method + "' in widget " + self);
             }
-            console.log("Proxy ▶️", method);
+            if (config.debug) {
+                console.log("Proxy ▶️", method);
+            }
             return fn.apply(self, arguments);
         };
     },
