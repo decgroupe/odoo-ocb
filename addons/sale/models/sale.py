@@ -1608,6 +1608,9 @@ class SaleOrderLine(models.Model):
                 args or [],
                 ['|', ('order_id.name', operator, name), ('name', operator, name)]
             ])
+            # Clear the `name` argument otherwise `super()._name_search` will
+            # re-add it to the arg pool and breaks our search logic
+            name = ''
         return super(SaleOrderLine, self)._name_search(name, args=args, operator=operator, limit=limit, name_get_uid=name_get_uid)
 
     @api.multi
