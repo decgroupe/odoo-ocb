@@ -279,8 +279,8 @@ var EventDispatcherMixin = _.extend({}, ParentedMixin, {
             if (fn === void 0) {
                 throw new Error("Couldn't find method '" + method + "' in widget " + self);
             }
-            if (config.debug) {
-                console.log("Proxy ▶️", method);
+            else if (config.debug) {
+                console.log("Proxy ▶️", method, fn);
             }
             return fn.apply(self, arguments);
         };
