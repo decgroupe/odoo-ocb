@@ -28,6 +28,7 @@ from odoo import _, api, exceptions, fields, models, tools
 from odoo.tools import pycompat, ustr, formataddr
 from odoo.tools.misc import clean_context
 from odoo.tools.safe_eval import safe_eval
+from odoo.tools.config import to_list
 
 
 _logger = logging.getLogger(__name__)
@@ -1147,6 +1148,14 @@ class MailThread(models.AbstractModel):
         catchall_alias = self.env['ir.config_parameter'].sudo().get_param("mail.catchall.alias")
         bounce_alias = self.env['ir.config_parameter'].sudo().get_param("mail.bounce.alias")
         alias_domain = self.env['ir.config_parameter'].sudo().get_param("mail.catchall.domain")
+
+        alias_other_domains = to_list(self.env['ir.config_parameter'].sudo().get_param("mail.catchall.other_domains"))
+        def match_other_domains(email):
+            for domain in alias_other_domains:
+                if email.endswith('@%s' % domain):
+                    return True
+            return False
+
         # activate strict alias domain check for stable, will be falsy by default to be backward compatible
         alias_domain_check = tools.str2bool(self.env['ir.config_parameter'].sudo().get_param("mail.catchall.domain.strict", "False"))
         fallback_model = model
@@ -1167,7 +1176,7 @@ class MailThread(models.AbstractModel):
         email_to_localparts = [
             e.split('@', 1)[0].lower()
             for e in (tools.email_split(email_to) or [''])
-            if not alias_domain_check or (not alias_domain or e.endswith('@%s' % alias_domain))
+            if not alias_domain_check or (not alias_domain or e.endswith('@%s' % alias_domain) or match_other_domains(e))
         ]
 
         # Delivered-To is a safe bet in most modern MTAs, but we have to fallback on To + Cc values
@@ -1181,7 +1190,7 @@ class MailThread(models.AbstractModel):
         rcpt_tos_localparts = [
             e.split('@')[0].lower()
             for e in tools.email_split(rcpt_tos)
-            if not alias_domain_check or (not alias_domain or e.endswith('@%s' % alias_domain))
+            if not alias_domain_check or (not alias_domain or e.endswith('@%s' % alias_domain) or match_other_domains(e))
         ]
 
         # 0. Verify whether this is a bounced email and use it to collect bounce data and update notifications for customers

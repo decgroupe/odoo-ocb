@@ -7,6 +7,7 @@ import datetime
 
 from odoo import api, models, tools, fields
 from odoo.tools import decode_smtp_header, decode_message_header
+from odoo.tools.config import to_list
 
 _logger = logging.getLogger(__name__)
 BLACKLIST_MAX_BOUNCED_LIMIT = 5
@@ -21,13 +22,21 @@ class MailThread(models.AbstractModel):
         """ Override to udpate mass mailing statistics based on bounce emails """
         bounce_alias = self.env['ir.config_parameter'].sudo().get_param("mail.bounce.alias")
         alias_domain = self.env['ir.config_parameter'].sudo().get_param("mail.catchall.domain")
+
+        alias_other_domains = to_list(self.env['ir.config_parameter'].sudo().get_param("mail.catchall.other_domains"))
+        def match_other_domains(email):
+            for domain in alias_other_domains:
+                if email.endswith('@%s' % domain):
+                    return True
+            return False
+
         # activate strict alias domain check for stable, will be falsy by default to be backward compatible
         alias_domain_check = self.env['ir.config_parameter'].sudo().get_param("mail.catchall.domain.strict")
         email_to = decode_message_header(message, 'To')
         email_to_localparts = [
             e.split('@', 1)[0].lower()
             for e in (tools.email_split(email_to) or [''])
-            if not alias_domain_check or (not alias_domain or e.endswith('@%s' % alias_domain))
+            if not alias_domain_check or (not alias_domain or e.endswith('@%s' % alias_domain) or match_other_domains(e))
         ]
 
         if bounce_alias and any(email.startswith(bounce_alias) for email in email_to_localparts):
