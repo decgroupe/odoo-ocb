@@ -716,7 +716,7 @@ class Message(models.Model):
                     model_record_ids.setdefault(vals['model'], set()).add(vals['res_id'])
             return model_record_ids
 
-        if self._uid == SUPERUSER_ID:
+        if self._uid == SUPERUSER_ID or self.env.user.has_group("base.group_system"):
             return
         # Non employees see only messages with a subtype (aka, not internal logs)
         if not self.env['res.users'].has_group('base.group_user'):
@@ -888,7 +888,7 @@ class Message(models.Model):
             if operation in ['write', 'unlink']:
                 document_related_ids += [mid for mid, message in message_values.items()
                                          if message.get('model') == model and message.get('res_id') in mids.ids and
-                                         message.get('moderation_status') != 'pending_moderation']
+                                        message.get('moderation_status') != 'pending_moderation']
             else:
                 document_related_ids += [mid for mid, message in message_values.items()
                                          if message.get('model') == model and message.get('res_id') in mids.ids]
