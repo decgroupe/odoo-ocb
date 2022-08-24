@@ -225,8 +225,9 @@ class MailActivity(models.Model):
 
         if operation in ('write', 'unlink'):
             try:
-                self.check_access_rule(operation)
+                self.with_context(silent_access_error=True).check_access_rule(operation)
             except exceptions.AccessError:
+                _logger.info(' --> Previous Access Denied error ignored for model: %s', self._name)
                 pass
             else:
                 return

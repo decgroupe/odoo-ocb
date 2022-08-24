@@ -3116,7 +3116,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                     _(
                         'The requested operation cannot be completed due to security restrictions. Please contact your system administrator.\n\n(Document type: %s, Operation: %s)'
                     ) % (self._description, operation)
-                    + ' - ({} {}, {} {})'.format(_('Records:'), invalid.ids[:6], _('User:'), self._uid)
+                    + ' - ({} {}, {} {})'.format(_('Records:'), invalid.ids[:6], _('User:'), self._uid), sender=self
                 )
 
         # If we get here, the invalid records are not in the database.

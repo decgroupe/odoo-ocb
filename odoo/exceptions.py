@@ -68,10 +68,11 @@ class AccessDenied(Exception):
 class AccessError(except_orm):
     """ Access rights error.
     Example: When you try to read a record that you are not allowed to."""
-    def __init__(self, msg):
+    def __init__(self, msg, sender=None):
         super(AccessError, self).__init__(msg)
-        print_stacktrace(_logger)
-        _logger.warning(msg)
+        if not sender or (sender and not sender.env.context.get('silent_access_error')):
+            print_stacktrace(_logger)
+            _logger.warning(msg)
 
 
 class CacheMiss(except_orm, KeyError):
