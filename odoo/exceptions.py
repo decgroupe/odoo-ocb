@@ -30,10 +30,11 @@ class except_orm(Exception):
 
 
 class UserError(except_orm):
-    def __init__(self, msg):
+    def __init__(self, msg, sender=None):
         super(UserError, self).__init__(msg, value='')
-        print_stacktrace(_logger)
-        _logger.warning(msg)
+        if not sender or (sender and not sender.env.context.get('silent_user_error')):
+            print_stacktrace(_logger)
+            _logger.warning(msg)
 
 
 # deprecated due to collision with builtins, kept for compatibility
