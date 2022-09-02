@@ -180,7 +180,7 @@ class Base(models.AbstractModel):
         """
         try:
             fname = progress_bar['field']
-            return self.read_group(domain, [fname], [group_by, fname], lazy=False)
+            return self.with_context(silent_UserError=True).read_group(domain, [fname], [group_by, fname], lazy=False)
         except UserError:
             # possibly failed because of grouping on or aggregating non-stored
             # field; fallback on alternative implementation

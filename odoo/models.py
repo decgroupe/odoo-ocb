@@ -2304,7 +2304,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 raise UserError(_("Unknown field %r in 'groupby'") % gb)
             gb_field = self._fields[gb].base_field
             if not (gb_field.store and gb_field.column_type):
-                raise UserError(_("Fields in 'groupby' must be database-persisted fields (no computed fields)"))
+                raise UserError(_("Fields in 'groupby' must be database-persisted fields (no computed fields)") + ":" + gb_field.name, self)
 
         aggregated_fields = []
         select_terms = []

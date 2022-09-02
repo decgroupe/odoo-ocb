@@ -14,6 +14,7 @@ treated as a 'Server error'.
 
 import logging
 import warnings
+from .tools import config
 from .tools.stacktrace import print_stacktrace
 
 _logger = logging.getLogger(__name__)
@@ -26,13 +27,16 @@ class UserError(Exception):
     state of a record. Semantically comparable to the generic 400 HTTP status codes.
     """
 
-    def __init__(self, message):
+    def __init__(self, message, sender=None):
         """
         :param message: exception message and frontend modal content
         """
         super().__init__(message)
-        print_stacktrace(_logger)
-        _logger.warning(message)
+        silent_ctx_var = "silent_%s" % (self.__class__.__name__)
+        
+        if not config['test_enable'] and not sender or (sender and not sender.env.context.get(silent_ctx_var)):
+            print_stacktrace(_logger)
+            _logger.warning(message)
 
     @property
     def name(self):
