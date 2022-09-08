@@ -111,6 +111,7 @@ class Registry(Mapping):
         self._assertion_report = assertion_report.assertion_report()
         self._fields_by_model = None
         self._post_init_queue = deque()
+        self._post_load_queue = deque()
         self._notnull_errors = {}
 
         # modules fully loaded (maintained during init phase by `loading` module)
@@ -289,6 +290,19 @@ class Registry(Mapping):
         """ Register a function to call at the end of :meth:`~.init_models`. """
         self._post_init_queue.append(partial(func, *args, **kwargs))
 
+    def post_load(self, func, *args, **kwargs):
+        """ Register a function to call after the data load. """
+        self._post_load_queue.append(partial(func, *args, **kwargs))
+
+    def recompute(self, cr, model_names):
+        env = odoo.api.Environment(cr, SUPERUSER_ID, {})
+        models = [env[model_name] for model_name in model_names]
+        while self._post_load_queue:
+            func = self._post_load_queue.popleft()
+            func()
+        if models:
+            models[0].recompute()
+
     def init_models(self, cr, model_names, context):
         """ Initialize a list of models (given by their name). Call methods
             ``_auto_init`` and ``init`` on each model to create or update the
@@ -308,6 +322,7 @@ class Registry(Mapping):
 
         # make sure the queue does not contain some leftover from a former call
         self._post_init_queue.clear()
+        self._post_load_queue.clear()
 
         for model in models:
             model._auto_init()

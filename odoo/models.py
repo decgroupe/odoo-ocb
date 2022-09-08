@@ -2466,7 +2466,10 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
                 new = field.update_db(self, columns)
                 if new and field.compute:
-                    self.pool.post_init(recompute, field)
+                    # Recompute will be called after XML/CSV module data load
+                    # instead of before, that way we can use env.ref() in the
+                    # compute method
+                    self.pool.post_load(recompute, field)
 
         if self._auto:
             self._add_sql_constraints()
