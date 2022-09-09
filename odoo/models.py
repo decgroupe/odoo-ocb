@@ -2701,6 +2701,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             if field.compute:
                 cls._field_computed[field] = group = groups[field.compute]
                 group.append(field)
+        return
         for fields in groups.values():
             compute_sudo = fields[0].compute_sudo
             if not all(field.compute_sudo == compute_sudo for field in fields):
