@@ -142,7 +142,7 @@
         white-space: pre-wrap;
     }
 
-    .o_data_cell.o_invisible_modifier {
+    .o_data_cell.o_invisible_modifier:not(.o_hidden) {
         // Override display: none to keep table cells aligned. Note: cannot use
         // 'initial' as it will force them to 'inline', not 'table-cell'.
         display: table-cell!important;
