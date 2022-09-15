@@ -64,9 +64,19 @@ from .tools import date_utils
 
 _logger = logging.getLogger(__name__)
 _logger_default = logging.getLogger(__name__ + '.default')
-_schema = logging.getLogger(__name__ + '.schema')
+_logger_default.setLevel(logging.ERROR)
 _unlink = logging.getLogger(__name__ + '.unlink')
+_unlink.setLevel(logging.ERROR)
 _openobject = logging.getLogger(__name__ + '.openobject')
+_openobject.setLevel(logging.ERROR)
+_openobject_create = logging.getLogger(__name__ + '.openobject.create')
+_openobject_create.setLevel(logging.ERROR)
+_openobject_write = logging.getLogger(__name__ + '.openobject.write')
+_openobject_write.setLevel(logging.ERROR)
+_openobject_search = logging.getLogger(__name__ + '.openobject.search')
+_openobject_search.setLevel(logging.ERROR)
+_openobject_read = logging.getLogger(__name__ + '.openobject.read')
+_openobject_read.setLevel(logging.ERROR)
 
 regex_order = re.compile('^(\s*([a-z0-9:_]+|"[a-z0-9:_]+")(\s+(desc|asc))?\s*(,|$))+(?<!,)$', re.I)
 regex_object_name = re.compile(r'^[a-z0-9_.]+$')
@@ -1570,7 +1580,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         """
         res = self.search(args, count=True)
         result = res if isinstance(res, pycompat.integer_types) else len(res)
-        _openobject.debug('search_count(%s, %s) = %d' % (self._name, args, result))
+        _openobject_search.info('search_count(%s, %s) = %d' % (self._name, args, result))
         return result
 
     @api.model
@@ -2119,7 +2129,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         :raise AccessError: * if user has no read rights on the requested object
                             * if user tries to bypass access rules for read on the requested object
         """
-        _openobject.debug('read_group(%s, %s, %s, %s, %d, %d)' % (self._name, domain, fields, groupby, offset, limit or 0))
+        _openobject_read.info('read_group(%s, %s, %s, %s, %d, %d)' % (self._name, domain, fields, groupby, offset, limit or 0))
         result = self._read_group_raw(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
 
         groupby = [groupby] if isinstance(groupby, pycompat.string_types) else list(OrderedSet(groupby))
@@ -2818,7 +2828,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         :raise AccessError: if user has no read rights on some of the given
                 records
         """
-        _openobject.debug('read(%s, %s) len=%d' % (self._name, fields, len(self)))
+        _openobject_read.info('read(%s, %s) len=%d' % (self._name, fields, len(self)))
         # check access rights
         self.check_access_rights('read')
         fields = self.check_field_access_rights('read', fields)
@@ -3325,7 +3335,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         if not self:
             return True
 
-        _openobject.debug('write(%s, %s) len=%d' % (self._name, vals, len(self)))
+        _openobject_write.info('write(%s, %s) len=%d' % (self._name, vals, len(self)))
         self._check_concurrency()
         try:
             self.check_access_rights('write')
@@ -3434,7 +3444,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         # low-level implementation of write()
         if not self:
             return True
-        _openobject.debug('_write(%s, %s)' % (self._name, vals))
+        _openobject_write.debug('_write(%s, %s)' % (self._name, vals))
         self.check_field_access_rights('write', list(vals))
 
         cr = self._cr
@@ -3564,7 +3574,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         """
         if not vals_list:
             return self.browse()
-        _openobject.debug('create(%s, %s) len=%d' % (self._name, vals_list, len(self)))
+        _openobject_create.info('create(%s, %s) len=%d' % (self._name, vals_list, len(self)))
 
         self = self.browse()
         self.check_access_rights('create')
@@ -3686,7 +3696,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
     def _create(self, data_list):
         """ Create records from the stored field values in ``data_list``. """
         assert data_list
-        _openobject.debug('_create(%s, %s)' % (self._name, data_list))
+        _openobject_create.debug('_create(%s, %s)' % (self._name, data_list))
 
         cr = self.env.cr
         quote = '"{}"'.format
@@ -4174,7 +4184,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                                   (not for ir.rules, this is only for ir.model.access)
         :return: a list of record ids or an integer (if count is True)
         """
-        _openobject.debug('_search(%s, %s, %d, %d, %s)' % (self._name, args, offset, limit or 0, order or ''))
+        _openobject_search.debug('_search(%s, %s, %d, %d, %s)' % (self._name, args, offset, limit or 0, order or ''))
         self.sudo(access_rights_uid or self._uid).check_access_rights('read')
 
         if expression.is_false(self, args):
@@ -4649,7 +4659,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         :rtype: List of dictionaries.
 
         """
-        _openobject.debug('search_read(%s, %s, %s, %d, %d)' % (self._name, domain, fields, offset, limit or 0))
+        _openobject_search.info('search_read(%s, %s, %s, %d, %d)' % (self._name, domain, fields, offset, limit or 0))
         records = self.search(domain or [], offset=offset, limit=limit, order=order)
         if not records:
             return []

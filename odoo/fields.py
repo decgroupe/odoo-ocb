@@ -38,7 +38,9 @@ RENAMED_ATTRS = [('select', 'index'), ('digits_compute', 'digits')]
 
 _logger = logging.getLogger(__name__)
 _compute_logger = logging.getLogger(__name__+'.compute')
+_compute_logger.setLevel(logging.ERROR)
 _schema = logging.getLogger(__name__[:-7] + '.schema')
+_schema.setLevel(logging.ERROR)
 
 Default = object()                      # default value for __init__() methods
 
@@ -616,7 +618,7 @@ class Field(MetaField('DummyField', (object,), {})):
 
     def _compute_related(self, records):
         """ Compute the related field ``self`` on ``records``. """
-        _compute_logger.debug('_compute_related %s', self)
+        _compute_logger.info('_compute_related %s', self)
         # when related_sudo, bypass access rights checks when reading values
         others = records.sudo() if self.related_sudo else records
         # copy the cache of draft records into others' cache
@@ -656,7 +658,7 @@ class Field(MetaField('DummyField', (object,), {})):
 
         # assign final values to records
         for record, value in pycompat.izip(records, values):
-            _compute_logger.debug('assign final value %s -> %s', self.name, value[self.related_field.name])
+            _compute_logger.info('assign final value %s -> %s', self.name, value[self.related_field.name])
             record[self.name] = value[self.related_field.name]
 
     def _inverse_related(self, records):
