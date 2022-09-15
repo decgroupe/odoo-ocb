@@ -39,7 +39,10 @@ IR_MODELS = (
 )
 
 _logger = logging.getLogger(__name__)
+_compute_logger = logging.getLogger(__name__+'.compute')
+_compute_logger.setLevel(logging.ERROR)
 _schema = logging.getLogger(__name__[:-7] + '.schema')
+_schema.setLevel(logging.ERROR)
 
 Default = object()                      # default value for __init__() methods
 
@@ -559,10 +562,12 @@ class Field(MetaField('DummyField', (object,), {})):
         # the case where 'bar' is a computed field that takes advantage of batch
         # computation.
         #
+        _compute_logger.info('_compute_related %s', self)
         values = list(records)
         for name in self.related[:-1]:
             try:
                 values = [first(value[name]) for value in values]
+                _compute_logger.debug('copy values from others for %s -> %s', name, values)
             except AccessError as e:
                 description = records.env['ir.model']._get(records._name).name
                 raise AccessError(
@@ -574,6 +579,7 @@ class Field(MetaField('DummyField', (object,), {})):
                 )
         # assign final values to records
         for record, value in zip(records, values):
+            _compute_logger.info('assign final value %s -> %s', self.name, value[self.related_field.name])
             record[self.name] = self._process_related(value[self.related_field.name])
 
     def _process_related(self, value):

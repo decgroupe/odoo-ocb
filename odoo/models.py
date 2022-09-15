@@ -68,8 +68,21 @@ from .tools.lru import LRU
 
 _logger = logging.getLogger(__name__)
 _logger_default = logging.getLogger(__name__ + '.default')
-_schema = logging.getLogger(__name__ + '.schema')
+_logger_default.setLevel(logging.ERROR)
 _unlink = logging.getLogger(__name__ + '.unlink')
+_unlink.setLevel(logging.ERROR)
+_openobject = logging.getLogger(__name__ + '.openobject')
+_openobject.setLevel(logging.ERROR)
+_openobject_create = logging.getLogger(__name__ + '.openobject.create')
+_openobject_create.setLevel(logging.ERROR)
+_openobject_write = logging.getLogger(__name__ + '.openobject.write')
+_openobject_write.setLevel(logging.ERROR)
+_openobject_search = logging.getLogger(__name__ + '.openobject.search')
+_openobject_search.setLevel(logging.ERROR)
+_openobject_namesearch = logging.getLogger(__name__ + '.openobject.namesearch')
+_openobject_namesearch.setLevel(logging.ERROR)
+_openobject_read = logging.getLogger(__name__ + '.openobject.read')
+_openobject_read.setLevel(logging.ERROR)
 
 regex_order = re.compile('^(\s*([a-z0-9:_]+|"[a-z0-9:_]+")(\s+(desc|asc))?\s*(,|$))+(?<!,)$', re.I)
 regex_object_name = re.compile(r'^[a-z0-9_.]+$')
@@ -1704,7 +1717,9 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         provided domain <reference/orm/domains>`.
         """
         res = self.search(args, count=True)
-        return res if isinstance(res, int) else len(res)
+        result = res if isinstance(res, int) else len(res)
+        _openobject_search.info('search_count(%s, %s) = %d' % (self._name, args, result))
+        return result
 
     @api.model
     @api.returns('self',
@@ -1829,6 +1844,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         for the name_get part to solve some access rights issues.
         """
         args = list(args or [])
+        _openobject_namesearch.debug('_name_search(%s, %s, %s, %s, %d)' % (self._name, name, args, operator, limit or 0))
         # optimize out the default criterion of ``ilike ''`` that matches everything
         if not self._rec_name:
             _logger.warning("Cannot execute name_search, no _rec_name defined on %s", self._name)
@@ -2045,7 +2061,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
     def _read_group_prepare(self, orderby, aggregated_fields, annotated_groupbys, query):
         """
         Prepares the GROUP BY and ORDER BY terms for the read_group method. Adds the missing JOIN clause
-        to the query if order should be computed against m2o field. 
+        to the query if order should be computed against m2o field.
         :param orderby: the orderby definition in the form "%(field)s %(order)s"
         :param aggregated_fields: list of aggregated fields in the query
         :param annotated_groupbys: list of dictionaries returned by _read_group_process_groupby
@@ -2142,9 +2158,9 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         return {
             'field': split[0],
             'groupby': gb,
-            'type': field_type, 
+            'type': field_type,
             'display_format': display_formats[gb_function or 'month'] if temporal else None,
-            'interval': time_intervals[gb_function or 'month'] if temporal else None,                
+            'interval': time_intervals[gb_function or 'month'] if temporal else None,
             'tz_convert': tz_convert,
             'qualified_field': qualified_field,
         }
@@ -2169,8 +2185,8 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
     @api.model
     def _read_group_format_result(self, data, annotated_groupbys, groupby, domain):
         """
-            Helper method to format the data contained in the dictionary data by 
-            adding the domain corresponding to its values, the groupbys in the 
+            Helper method to format the data contained in the dictionary data by
+            adding the domain corresponding to its values, the groupbys in the
             context and by properly formatting the date/datetime values.
 
         :param data: a single group
@@ -2249,10 +2265,10 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 The possible aggregation functions are the ones provided by PostgreSQL
                 (https://www.postgresql.org/docs/current/static/functions-aggregate.html)
                 and 'count_distinct', with the expected meaning.
-        :param list groupby: list of groupby descriptions by which the records will be grouped.  
+        :param list groupby: list of groupby descriptions by which the records will be grouped.
                 A groupby description is either a field (then it will be grouped by that field)
                 or a string 'field:groupby_function'.  Right now, the only functions supported
-                are 'day', 'week', 'month', 'quarter' or 'year', and they only make sense for 
+                are 'day', 'week', 'month', 'quarter' or 'year', and they only make sense for
                 date/datetime fields.
         :param int offset: optional number of records to skip
         :param int limit: optional max number of records to return
@@ -2260,7 +2276,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                              overriding the natural sort ordering of the
                              groups, see also :py:meth:`~osv.osv.osv.search`
                              (supported only for many2one fields currently)
-        :param bool lazy: if true, the results are only grouped by the first groupby and the 
+        :param bool lazy: if true, the results are only grouped by the first groupby and the
                 remaining groupbys are put in the __context key.  If false, all the groupbys are
                 done in one call.
         :return: list of dictionaries(one dictionary for each record) containing:
@@ -2272,6 +2288,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         :raise AccessError: * if user has no read rights on the requested object
                             * if user tries to bypass access rules for read on the requested object
         """
+        _openobject_read.info('read_group(%s, %s, %s, %s, %d, %d)' % (self._name, domain, fields, groupby, offset, limit or 0))
         result = self._read_group_raw(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
 
         groupby = [groupby] if isinstance(groupby, str) else list(OrderedSet(groupby))
@@ -2419,7 +2436,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             # Right now, read_group only fill results in lazy mode (by default).
             # If you need to have the empty groups in 'eager' mode, then the
             # method _read_group_fill_results need to be completely reimplemented
-            # in a sane way 
+            # in a sane way
             result = self._read_group_fill_results(
                 domain, groupby_fields[0], groupby[len(annotated_groupbys):],
                 aggregated_fields, count_field, result, read_group_order=order,
@@ -3027,6 +3044,7 @@ Fields:
         :raise AccessError: if user has no read rights on some of the given
                 records
         """
+        _openobject_read.info('read(%s, %s) len=%d' % (self._name, fields, len(self)))
         fields = self.check_field_access_rights('read', fields)
 
         # fetch stored fields from the database to the cache
@@ -3602,6 +3620,7 @@ Fields:
         if not self:
             return True
 
+        _openobject_write.info('write(%s, %s) len=%d' % (self._name, vals, len(self)))
         self.check_access_rights('write')
         self.check_field_access_rights('write', vals.keys())
         self.check_access_rule('write')
@@ -3760,6 +3779,7 @@ Fields:
         if not self:
             return True
 
+        _openobject_write.debug('_write(%s, %s)' % (self._name, vals))
         self._check_concurrency()
         cr = self._cr
 
@@ -3836,6 +3856,7 @@ Fields:
         """
         if not vals_list:
             return self.browse()
+        _openobject_create.info('create(%s, %s) len=%d' % (self._name, vals_list, len(self)))
 
         self = self.browse()
         self.check_access_rights('create')
@@ -3955,6 +3976,8 @@ Fields:
     def _create(self, data_list):
         """ Create records from the stored field values in ``data_list``. """
         assert data_list
+        _openobject_create.debug('_create(%s, %s)' % (self._name, data_list))
+
         cr = self.env.cr
         quote = '"{}"'.format
 
@@ -4000,7 +4023,7 @@ Fields:
             # that this limit is well managed by PostgreSQL.
             # In INSERT queries, we inject integers (small) and larger data (TEXT blocks for
             # example).
-            # 
+            #
             # The problem then becomes: how to "estimate" the right size of the batch to have
             # good performance?
             #
@@ -4457,7 +4480,7 @@ Fields:
             order_by_elements = self._generate_order_by_inner(self._table, order_spec, query)
             if order_by_elements:
                 order_by_clause = ",".join(order_by_elements)
-
+        _openobject.debug('_generate_order_by = %s' % (order_by_clause))
         return order_by_clause and (' ORDER BY %s ' % order_by_clause) or ''
 
     @api.model
@@ -4547,6 +4570,7 @@ Fields:
                                   (not for ir.rules, this is only for ir.model.access)
         :return: a list of record ids or an integer (if count is True)
         """
+        _openobject_search.debug('_search(%s, %s, %d, %d, %s)' % (self._name, args, offset, limit or 0, order or ''))
         model = self.with_user(access_rights_uid) if access_rights_uid else self
         model.check_access_rights('read')
 
@@ -4890,6 +4914,7 @@ Fields:
         :return: List of dictionaries containing the asked fields.
         :rtype: list(dict).
         """
+        _openobject_search.info('search_read(%s, %s, %s, %d, %d)' % (self._name, domain, fields, offset, limit or 0))
         records = self.search(domain or [], offset=offset, limit=limit, order=order)
         if not records:
             return []
@@ -6318,7 +6343,7 @@ Fields:
             # apply field-specific onchange methods
             for name in todo:
                 if field_onchange.get(name):
-                    # store name of the first field before event propagation 
+                    # store name of the first field before event propagation
                     if not record._onchange_origin:
                         record._onchange_origin = name
                     record._onchange_eval(name, field_onchange[name], result)
@@ -6431,7 +6456,7 @@ Fields:
         field_generators = self._populate_factories()
         if not field_generators:
             return self.browse() # maybe create an automatic generator?
-            
+
         records_batches = []
         generator = populate.chain_factories(field_generators, self._name)
         while record_count <= min_size or not complete:
