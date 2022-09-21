@@ -2,28 +2,21 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import datetime
-import logging
 import string
 import re
+import stdnum
+from stdnum.eu.vat import check_vies
+from stdnum.exceptions import InvalidComponent
+from stdnum.util import clean
 
-_logger = logging.getLogger(__name__)
-try:
-    import vatnumber
-except ImportError:
-    _logger.warning("VAT validation partially unavailable because the `vatnumber` Python library cannot be found. "
-                    "Install it to support more countries, for example with `easy_install vatnumber`.")
-    vatnumber = None
-
-# Although stdnum is a dependency of vatnumber, the import of the latter is surrounded by a try/except
-# if it is not installed. Therefore, we cannot be sure stdnum is installed in all cases.
-try:
-    import stdnum
-except ImportError:
-    stdnum = None
+import logging
 
 from odoo import api, models, tools, _
 from odoo.tools.misc import ustr
 from odoo.exceptions import ValidationError
+
+
+_logger = logging.getLogger(__name__)
 
 _eu_country_vat = {
     'GR': 'EL'
@@ -92,7 +85,7 @@ class ResPartner(models.Model):
         if not ustr(country_code).encode('utf-8').isalpha():
             return False
         check_func_name = 'check_vat_' + country_code
-        check_func = getattr(self, check_func_name, None) or getattr(vatnumber, check_func_name, None)
+        check_func = getattr(self, check_func_name, None) or getattr(stdnum.util.get_cc_module(country_code, 'vat'), 'is_valid', None)
         if not check_func:
             # No VAT validation available, default to check that the country code exists
             if country_code.upper() == 'EU':
@@ -108,20 +101,24 @@ class ResPartner(models.Model):
     def _check_vies(self, vat):
         # Store the VIES result in the cache. In case an exception is raised during the request
         # (e.g. service unavailable), the fallback on simple_vat_check is not kept in cache.
-        return vatnumber.check_vies(vat)
+        return check_vies(vat)
 
     @api.model
     def vies_vat_check(self, country_code, vat_number):
         try:
             # Validate against  VAT Information Exchange System (VIES)
             # see also http://ec.europa.eu/taxation_customs/vies/
-            return self._check_vies(country_code.upper() + vat_number)
+            vies_result = self._check_vies(country_code.upper() + vat_number)
+            return vies_result['valid']
+        except InvalidComponent:
+            return False
         except Exception:
             # see http://ec.europa.eu/taxation_customs/vies/checkVatService.wsdl
             # Fault code may contain INVALID_INPUT, SERVICE_UNAVAILABLE, MS_UNAVAILABLE,
             # TIMEOUT or SERVER_BUSY. There is no way we can validate the input
             # with VIES if any of these arise, including the first one (it means invalid
             # country code or empty VAT number), so we fall back to the simple check.
+            _logger.exception("Failed VIES VAT check.")
             return self.simple_vat_check(country_code, vat_number)
 
     @api.model
