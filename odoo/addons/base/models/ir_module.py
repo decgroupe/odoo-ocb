@@ -196,7 +196,10 @@ class Module(models.Model):
                     'xml_declaration': False,
                     'file_insertion_enabled': False,
                 }
-                output = publish_string(source=module.description if not module.application and module.description else '', settings_overrides=overrides, writer=MyWriter())
+                try:
+                    output = publish_string(source=module.description if not module.application and module.description else '', settings_overrides=overrides, writer=MyWriter())
+                except:
+                    output ="Error from `_get_desc`"
                 module.description_html = tools.html_sanitize(output)
 
     @api.depends('name')
