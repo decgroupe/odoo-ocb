@@ -1226,13 +1226,35 @@ class GroupsView(models.Model):
                     app_name = app.name or 'Other'
                     xml3.append(E.separator(string=app_name, colspan="4", **attrs))
                     attrs['attrs'] = user_type_readonly
-                    for g in gs:
+                    gss = [g for g in gs]
+                    # Sort group by name first then by XML-ID
+                    gss.sort(key=lambda g: g.name, reverse=False)
+                    gss.sort(key=lambda g: g.get_external_id()[g.id] or "~", reverse=False)
+                    active_module = False
+                    for g in gss:
                         field_name = name_boolean_group(g.id)
+                        xml_id = g.get_external_id()[g.id]
+                        module = xml_id.partition('.')[0]
                         if g == group_no_one:
                             # make the group_no_one invisible in the form view
                             xml3.append(E.field(name=field_name, invisible="1", **attrs))
+                            # also add the XML-ID to be consistent with other
+                            # groups and avoid a column shift
+                            xml3.append(E.small(xml_id, invisible="1", colspan="2", groups="base.group_no_one"))
                         else:
+                            if module != active_module:
+                                first = (active_module == False)
+                                active_module = module
+                                module_id = self.env['ir.module.module'].search([('name', '=', active_module)], limit=1)
+                                module_title = module_id.shortdesc or active_module or False
+                                if module_title or (not module_title and not first):
+                                    # add an intermediate title separator to
+                                    # regroup groups from the same module
+                                    xml3.append(E.small(module_title or "---", colspan="4", **attrs))
+                            # on left, display the group name and its checkbox
                             xml3.append(E.field(name=field_name, **attrs))
+                            # on right, small hint to display the group XML-ID
+                            xml3.append(E.small(xml_id, colspan="2", groups="base.group_no_one"))
 
             xml3.append({'class': "o_label_nowrap"})
             if user_type_field_name:

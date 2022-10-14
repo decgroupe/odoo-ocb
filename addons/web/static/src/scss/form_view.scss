@@ -518,6 +518,9 @@
             display: inline-table;
 
             > tbody > tr > td {
+                padding-top: 0px;
+                padding-bottom: 0px;
+
                 &.o_td_label {
                     width: 0%;
                     padding: 0 15px 0 0;
