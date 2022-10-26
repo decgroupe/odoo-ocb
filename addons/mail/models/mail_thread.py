@@ -1167,6 +1167,8 @@ class MailThread(models.AbstractModel):
         references = tools.decode_message_header(message, 'References')
         in_reply_to = tools.decode_message_header(message, 'In-Reply-To').strip()
         thread_references = references or in_reply_to
+        if not thread_references:
+            thread_references = self._message_route_get_thread_references(message, message_dict)
         reply_match, reply_model, reply_thread_id, reply_hostname, reply_private = tools.email_references(thread_references)
 
         # author and recipients
@@ -1343,6 +1345,10 @@ class MailThread(models.AbstractModel):
             'Create an appropriate mail.alias or force the destination model.' %
             (email_from, email_to, message_id)
         )
+
+    @api.model
+    def _message_route_get_thread_references(self, message, message_dict):
+        return ''
 
     @api.model
     def message_route_process(self, message, message_dict, routes):
