@@ -636,6 +636,9 @@ ActionManager.include({
                 });
         };
 
+        if (!(viewType in action.controllers)) {
+            console.error("View type '" + viewType + "' is not present in the action views.");
+        }
         var controllerDef = action.controllers[viewType];
         if (!controllerDef || controllerDef.state() === 'rejected') {
             // if the controllerDef is rejected, it probably means that the js
