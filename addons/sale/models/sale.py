@@ -320,7 +320,7 @@ class SaleOrder(models.Model):
     @api.multi
     def _track_subtype(self, init_values):
         self.ensure_one()
-        if 'state' in init_values and self.state == 'sale':
+        if 'state' in init_values and init_values.get('state') != 'done' and self.state == 'sale':
             return 'sale.mt_order_confirmed'
         elif 'state' in init_values and self.state == 'sent':
             return 'sale.mt_order_sent'
