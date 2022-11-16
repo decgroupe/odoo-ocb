@@ -88,8 +88,9 @@ class MissingError(except_orm):
     Example: When you try to write on a deleted record."""
     def __init__(self, msg):
         super(MissingError, self).__init__(msg)
-        print_stacktrace(_logger)
-        _logger.warning(msg)
+        if _logger.isEnabledFor(logging.DEBUG):
+            print_stacktrace(_logger)
+            _logger.warning(msg)
 
 
 class ValidationError(except_orm):
