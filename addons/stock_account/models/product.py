@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import logging
+
 from odoo import api, fields, models, tools, _
 from odoo.exceptions import UserError
 from odoo.tools import float_is_zero, pycompat
+from odoo.tools.progressbar import progressbar as pb
 from odoo.addons import decimal_precision as dp
 
-
+_logger = logging.getLogger(__name__)
 
 class ProductTemplate(models.Model):
     _name = 'product.template'
@@ -200,6 +203,7 @@ class ProductProduct(models.Model):
     @api.multi
     @api.depends('stock_move_ids.product_qty', 'stock_move_ids.state', 'stock_move_ids.remaining_value', 'product_tmpl_id.cost_method', 'product_tmpl_id.standard_price', 'product_tmpl_id.property_valuation', 'product_tmpl_id.categ_id.property_valuation')
     def _compute_stock_value(self):
+        _logger.info("_compute_stock_value")
         StockMove = self.env['stock.move']
         to_date = self.env.context.get('to_date')
 
@@ -248,7 +252,7 @@ class ProductProduct(models.Model):
             product_values[product_id] = value
             product_move_ids[product_id] = move_ids
 
-        for product in self:
+        for product in pb(self):
             if product.cost_method in ['standard', 'average']:
                 qty_available = product.with_context(company_owned=True, owner_id=False).qty_available
                 price_used = product.standard_price
