@@ -8,6 +8,7 @@ import logging
 
 import odoo
 import odoo.tools as tools
+from odoo.tools.progressbar import progressbar as pb
 
 _logger = logging.getLogger(__name__)
 
@@ -57,7 +58,7 @@ class Graph(dict):
             force = []
         packages = []
         len_graph = len(self)
-        for module in module_list:
+        for module in pb(module_list):
             # This will raise an exception if no/unreadable descriptor file.
             # NOTE The call to load_information_from_description_file is already
             # done by db.initialize, so it is possible to not do it again here.
