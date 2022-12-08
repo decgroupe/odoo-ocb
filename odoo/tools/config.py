@@ -65,6 +65,24 @@ def _deduplicate_loggers(loggers):
         for logger, level in dict(it.split(':') for it in loggers).items()
     )
 
+def to_list(value):
+    res = []
+    if value:
+        if isinstance(value, str):
+            value = value.split(',')
+        for m in value:
+            res += [x.strip() for x in m.split(',') if x.strip()]
+    return res
+
+def to_dict(value):
+    if value:
+        value = to_list(value)
+    if value:
+        res = dict.fromkeys(value, 1)
+    else:
+        res = {}
+    return res
+
 class configmanager(object):
     def __init__(self, fname=None):
         """Constructor.
