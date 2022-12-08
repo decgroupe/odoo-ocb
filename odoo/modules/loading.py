@@ -400,7 +400,7 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
             if module_names:
                 modules = Module.search([('state', '=', 'installed'), ('name', 'in', module_names)])
                 if modules:
-                    modules.with_context(ignore_module_list_update=True).button_upgrade()
+                    modules.with_context(ignore_module_list_update='all' not in module_names).button_upgrade()
 
             cr.execute("update ir_module_module set state=%s where name=%s", ('installed', 'base'))
             Module.invalidate_cache(['state'])
