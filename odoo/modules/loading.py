@@ -20,6 +20,7 @@ import odoo.tools as tools
 
 from odoo import api, SUPERUSER_ID
 from odoo.modules.module import adapt_version, initialize_sys_path, load_openerp_module
+from odoo.tools.progressbar import progressbar as pb
 
 _logger = logging.getLogger(__name__)
 _test_logger = logging.getLogger('odoo.tests')
@@ -157,7 +158,7 @@ def load_module_graph(cr, graph, status=None, perform_checks=True,
 
     models_updated = set()
 
-    for index, package in enumerate(graph, 1):
+    for index, package in pb(enumerate(graph, 1)):
         module_name = package.name
         module_id = package.id
 
