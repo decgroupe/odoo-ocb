@@ -17,6 +17,7 @@ import odoo.modules.graph
 import odoo.modules.migration
 import odoo.modules.registry
 from .. import SUPERUSER_ID, api, tools
+from .. import tools.progressbar import progressbar as pb
 from .module import adapt_version, initialize_sys_path, load_openerp_module
 
 _logger = logging.getLogger(__name__)
@@ -147,7 +148,7 @@ def load_module_graph(cr, graph, status=None, perform_checks=True,
 
     models_updated = set()
 
-    for index, package in enumerate(graph, 1):
+    for index, package in pb(enumerate(graph, 1)):
         module_name = package.name
         module_id = package.id
 
