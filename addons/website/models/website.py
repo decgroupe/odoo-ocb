@@ -92,6 +92,7 @@ class Website(models.Model):
     social_github = fields.Char('GitHub Account', default=_default_social_github)
     social_linkedin = fields.Char('LinkedIn Account', default=_default_social_linkedin)
     social_youtube = fields.Char('Youtube Account', default=_default_social_youtube)
+    social_googleplus = fields.Char('Google+ Account')
     social_instagram = fields.Char('Instagram Account', default=_default_social_instagram)
     social_default_image = fields.Binary(string="Default Social Share Image", help="If set, replaces the company logo as the default social share image.")
 
