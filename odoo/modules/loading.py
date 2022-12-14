@@ -433,6 +433,8 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
             module_names = [k for k, v in tools.config['update'].items() if v]
             if module_names:
                 modules = Module.search([('state', 'in', ('installed', 'to upgrade')), ('name', 'in', module_names)])
+                for module_name in [k for k in module_names if k not in modules.mapped('name')]:
+                    _logger.warning("⚠️ Module %s was not found installed in this database", module_name)
                 if modules:
                     modules.with_context(ignore_module_list_update='all' not in module_names).button_upgrade()
 
