@@ -782,13 +782,18 @@ def convert_xml_import(cr, module, xmlfile, idref=None, mode='init', noupdate=Fa
         relaxng.assert_(doc)
     except Exception:
         _logger.exception("The XML file '%s' does not fit the required schema !", xmlfile.name)
+        args = ['pyjing', schema, xmlfile.name]
         if jingtrang:
-            p = subprocess.run(['pyjing', schema, xmlfile.name], stdout=subprocess.PIPE)
-            _logger.warning(p.stdout.decode())
+            try:
+                p = subprocess.run(args, stdout=subprocess.PIPE)
+                _logger.warning(p.stdout.decode())
+            except Exception:
+                _logger.warn("Run manually:\n%s", " ".join(args))
         else:
             for e in relaxng.error_log:
                 _logger.warning(e)
             _logger.info("Install 'jingtrang' for more precise and useful validation messages.")
+            _logger.warn("Or run manually if needed:\n%s", " ".join(args))
         raise
 
     if isinstance(xmlfile, str):
