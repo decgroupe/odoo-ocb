@@ -1306,7 +1306,7 @@ actual arch.
                 fields = dict.fromkeys(get_variable_names(expr), '%s=%s' % (attr, expr))
                 name_manager.must_have_fields(fields)
 
-            elif attr in ('attrs', 'context'):
+            elif attr in ('attrs', 'context') and expr:
                 for key, val_ast in get_dict_asts(expr).items():
                     if attr == 'attrs' and isinstance(val_ast, ast.List):
                         # domains in attrs are used for readonly, invisible, ...
