@@ -16,8 +16,8 @@ import odoo.modules.db
 import odoo.modules.graph
 import odoo.modules.migration
 import odoo.modules.registry
+from odoo.tools.progressbar import progressbar as pb
 from .. import SUPERUSER_ID, api, tools
-from .. import tools.progressbar import progressbar as pb
 from .module import adapt_version, initialize_sys_path, load_openerp_module
 
 _logger = logging.getLogger(__name__)
