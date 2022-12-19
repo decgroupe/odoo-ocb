@@ -126,6 +126,8 @@ class configmanager(object):
         group.add_option("-i", "--init", dest="init", action="append", help="install one or more modules (comma-separated list, use \"all\" for all modules), requires -d")
         group.add_option("-u", "--update", dest="update", action="append",
                           help="update one or more modules (comma-separated list, use \"all\" for all modules). Requires -d.")
+        group.add_option("--update-from", dest="update_from", type="string",
+                        help="Use this for iterative updates, when you know modules loading order and want to continue update from a specific module.")
         group.add_option("--without-demo", dest="without_demo",
                           help="disable loading demo data for modules to be installed (comma-separated, use \"all\" for all modules). Requires -d and -i. Default is %default",
                           my_default=False)
@@ -459,7 +461,7 @@ class configmanager(object):
                 'email_from', 'smtp_server', 'smtp_user', 'smtp_password',
                 'db_maxconn', 'import_partial', 'addons_path', 'upgrade_path',
                 'syslog', 'without_demo', 'screencasts', 'screenshots',
-                'dbfilter', 'log_level', 'log_db',
+                'dbfilter', 'log_level', 'log_db', 'update_from',
                 'log_db_level', 'geoip_database', 'dev_mode', 'shell_interface'
         ]
 

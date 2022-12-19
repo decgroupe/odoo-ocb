@@ -148,6 +148,8 @@ def load_module_graph(cr, graph, status=None, perform_checks=True,
     cr.rollback_org = cr.rollback
     cr.rollback = lambda *args: None
 
+    update_from = odoo.tools.config.options["update_from"]
+
     # register, instantiate and initialize models for each modules
     t0 = time.time()
     loading_extra_query_count = odoo.sql_db.sql_counter
@@ -171,6 +173,18 @@ def load_module_graph(cr, graph, status=None, perform_checks=True,
             or hasattr(package, "update")
             or package.state in ("to install", "to upgrade")
         )
+
+        if update_from and package.name != 'base':
+            if update_from == module_name:
+                update_from = False
+            elif needs_update and package.state == "to upgrade":
+                package.state = 'installed'
+                needs_update = False
+                env = api.Environment(cr, SUPERUSER_ID, {})
+                module = env['ir.module.module'].browse(module_id)
+                module.write({'state': 'installed'})
+                module.flush()
+
         module_log_level = logging.DEBUG
         if needs_update:
             module_log_level = logging.INFO
