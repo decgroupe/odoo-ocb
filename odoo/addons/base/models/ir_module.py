@@ -29,6 +29,7 @@ from odoo.exceptions import AccessDenied, UserError
 from odoo.osv import expression
 from odoo.tools.parse_version import parse_version
 from odoo.tools.misc import topological_sort
+from odoo.tools.progressbar import progressbar as pb
 from odoo.http import request
 
 _logger = logging.getLogger(__name__)
@@ -730,7 +731,7 @@ class Module(models.Model):
         known_mods_names = {mod.name: mod for mod in known_mods}
 
         # iterate through detected modules and update/create them in db
-        for mod_name in modules.get_modules():
+        for mod_name in pb(modules.get_modules()):
             mod = known_mods_names.get(mod_name)
             terp = self.get_module_info(mod_name)
             values = self.get_values_from_terp(terp)
