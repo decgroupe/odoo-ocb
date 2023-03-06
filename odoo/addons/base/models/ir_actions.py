@@ -114,6 +114,19 @@ class IrActions(models.Model):
                     continue
                 if action_model and not IrModelAccess.check(action_model, mode='read', raise_exception=False):
                     # the user won't be able to read records
+                    _logger.warning("Model '%s' is not readable for %s, "
+                                    "action '%s' is ignored", 
+                                    action_model, 
+                                    self.env.user.name, 
+                                    action.name)
+                    
+                    sn_am = action_model.replace('.', '_')
+                    print("eg: ./security/ir.model.access.csv")
+                    print("id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink")
+                    print("access_%s_group_user,access_%s group_user,model_%s,base.group_user,1,0,0,0" %
+                            (sn_am,sn_am,sn_am))
+                    print("access_%s_group_manager,access_%s group_manager,model_%s,base.group_system,1,1,1,1" %
+                            (sn_am,sn_am,sn_am))
                     continue
                 result[binding_type].append(action.read()[0])
             except (AccessError, MissingError):
