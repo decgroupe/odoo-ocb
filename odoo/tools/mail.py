@@ -65,6 +65,10 @@ class _Cleaner(clean.Cleaner):
             for attribute in ('style', 'color', 'width', 'left-radius', 'right-radius')]
     )
 
+    _style_whitelist.extend(
+        ['background', 'background-url']
+    )
+
     strip_classes = False
     sanitize_style = False
 
