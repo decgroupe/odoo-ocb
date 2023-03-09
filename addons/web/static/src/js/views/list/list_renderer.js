@@ -705,7 +705,13 @@ var ListRenderer = BasicRenderer.extend({
         var $th = $('<th>')
             .addClass('o_group_name')
             .attr('tabindex', -1)
-            .text(name + ' (' + group.count + ')');
+            .text(name);
+        var $count = $('<div>')
+            .addClass('o_group_count')
+            .addClass('badge')
+            .addClass('badge-primary')
+            .css('margin-left', '5px')
+            .text(group.count);
         var $arrow = $('<span>')
             .css('padding-left', 2 + (groupLevel * 20) + 'px')
             .css('padding-right', '5px')
@@ -715,6 +721,7 @@ var ListRenderer = BasicRenderer.extend({
                 .toggleClass('fa-caret-down', group.isOpen);
         }
         $th.prepend($arrow);
+        $th.append($count);
         cells.push($th);
 
         var aggregateKeys = Object.keys(group.aggregateValues);
