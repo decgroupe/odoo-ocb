@@ -1095,6 +1095,8 @@ actual arch.
                 'Field "%(field_name)s" does not exist in model "%(model_name)s"',
                 field_name=name, model_name=name_manager.Model._name,
             )
+            if name.startswith("in_group_"):
+                msg += "\n Try to update env['res.groups']._update_user_groups_view()"
             self.handle_view_error(msg)
         if node.get('domain') and field.comodel_name not in self.env:
             msg = _(
