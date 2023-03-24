@@ -402,8 +402,8 @@ class configmanager(object):
         die(opt.translate_in and (not opt.language or not opt.db_name),
             "the i18n-import option cannot be used without the language (-l) and the database (-d) options")
 
-        die(opt.overwrite_existing_translations and not (opt.translate_in or opt.update),
-            "the i18n-overwrite option cannot be used without the i18n-import option or without the update option")
+        die(opt.overwrite_existing_translations and not (opt.translate_in or opt.update or opt.init),
+            "the i18n-overwrite option cannot be used without the i18n-import option or without the update/init option")
 
         die(opt.translate_out and (not opt.db_name),
             "the i18n-export option cannot be used without the database (-d) option")
