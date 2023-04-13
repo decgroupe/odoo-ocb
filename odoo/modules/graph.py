@@ -18,9 +18,9 @@ class Graph(dict):
 
     """
 
-    def add_node(self, name, info):
+    def add_node(self, name, info, depends):
         max_depth, father = 0, None
-        for d in info['depends']:
+        for d in depends:
             n = self.get(d) or Node(d, self, None)  # lazy creation, do not use default value for get()
             if n.depth >= max_depth:
                 father = n
@@ -73,6 +73,10 @@ class Graph(dict):
         while packages and current > later:
             package, info = packages[0]
             deps = info['depends']
+            # add soft dependencies only if these modules exists
+            available_deps = [x for x in info['soft_depends'] if x in dependencies]
+            if available_deps:
+                deps = deps + available_deps
 
             # if all dependencies of 'package' are already in the graph, add 'package' in the graph
             if all(dep in self for dep in deps):
@@ -81,7 +85,7 @@ class Graph(dict):
                     continue
                 later.clear()
                 current.remove(package)
-                node = self.add_node(package, info)
+                node = self.add_node(package, info, deps)
                 for kind in ('init', 'demo', 'update'):
                     if package in tools.config[kind] or 'all' in tools.config[kind] or kind in force:
                         setattr(node, kind, True)
@@ -106,11 +110,20 @@ class Graph(dict):
             level_modules = sorted((name, module) for name, module in self.items() if module.depth==level)
             for name, module in level_modules:
                 done.remove(name)
-                yield module
+                # only returns module with data
+                if module.data:
+                    yield module
             level += 1
 
     def __str__(self):
         return '\n'.join(str(n) for n in self if n.depth == 0)
+
+    def _pprint(self):
+        TABLE_FMT = "{:<6} {:<6} {:<40} {:<80} {}\n"
+        res = TABLE_FMT.format("Index", "Depth", "Name", "Dependencies", "Soft Dependencies")
+        for index, node in enumerate(self):
+            res += TABLE_FMT.format(index, node.depth, node.name, str(node.info.get('depends')), str(node.info.get('soft_depends')))
+        return res
 
 class Node(object):
     """ One module in the modules dependency graph.
@@ -123,6 +136,7 @@ class Node(object):
     def __new__(cls, name, graph, info):
         if name in graph:
             inst = graph[name]
+            inst.info = info
         else:
             inst = object.__new__(cls)
             graph[name] = inst
@@ -141,15 +155,19 @@ class Node(object):
     def data(self):
         return self.info
 
+    @staticmethod
+    def sort(nodes):
+        return sorted(nodes, key=lambda x: (x.depth, x.name))
+
     def add_child(self, name, info):
         node = Node(name, self.graph, info)
         node.depth = self.depth + 1
         if node not in self.children:
             self.children.append(node)
+            self.children = Node.sort(self.children)
         for attr in ('init', 'update', 'demo'):
             if hasattr(self, attr):
                 setattr(node, attr, True)
-        self.children.sort(key=lambda x: x.name)
         return node
 
     def __setattr__(self, name, value):
