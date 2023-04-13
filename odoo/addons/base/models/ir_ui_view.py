@@ -755,6 +755,7 @@ actual arch.
         """
         inherit_tree = collections.defaultdict(list)
         for view in self.get_inheriting_views_arch(model):
+            _logger.debug("apply_view_inheritance: %s", view.model_data_id.complete_name)
             inherit_tree[view.inherit_id].append(view)
         return self._apply_view_inheritance(source, inherit_tree)
 
