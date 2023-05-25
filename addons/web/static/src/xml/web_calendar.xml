@@ -14,7 +14,24 @@
     <t t-name="calendar-box">
         <div t-att-style="typeof color === 'string' ? ('background-color:' + color) + ';' : ''" t-attf-class="#{record.is_highlighted ? 'o_event_hightlight' : ''} #{typeof color === 'number' ? _.str.sprintf('o_calendar_color_%s', color) : 'o_calendar_color_1'}">
             <span t-if="showTime" class="fc-time"/>
-            <div class="o_event_title" t-esc="record.display_name"/>
+            <div class="o_event_title">
+                <t t-foreach="widget.displayFields" t-as="name">
+                    <t t-if="!widget.displayFields[name].attrs['card_invisible']">
+                        <div t-attf-class="o_field_#{name} o_field_type_#{fields[name].type}">
+                            <t t-if="widget.displayFields[name].attrs['avatar_field']">
+                                <t t-if="!isMobile"><t t-esc="fields[name].string"/>:</t>
+                                <div class="o_calendar_avatars float-right">
+                                    <t t-foreach="widget.getAvatars(record, name, widget.displayFields[name].attrs['avatar_field']).slice(0,3)" t-as="image"><t t-raw="image"/></t>
+                                    <span t-if="record[name].length - 3 > 0">+<t t-esc="record[name].length - 3"/></span>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <t t-esc="format(record, name)"/>
+                            </t>
+                        </div>
+                    </t>
+                </t>
+            </div>
         </div>
     </t>
 

@@ -86,9 +86,11 @@ var CalendarView = AbstractView.extend({
             if (child.tag !== 'field') return;
             var fieldName = child.attrs.name;
             fieldNames.push(fieldName);
-            if (!child.attrs.invisible || child.attrs.filters) {
+            var invisible = child.attrs.invisible && pyUtils.py_eval(child.attrs.invisible);
+            if (!invisible || child.attrs.filters) {
                 child.attrs.options = child.attrs.options ? pyUtils.py_eval(child.attrs.options) : {};
-                if (!child.attrs.invisible) {
+                child.attrs.card_invisible = child.attrs.card_invisible && pyUtils.py_eval(child.attrs.card_invisible);
+                if (!invisible) {
                     displayFields[fieldName] = {attrs: child.attrs};
                 }
 

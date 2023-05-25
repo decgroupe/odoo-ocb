@@ -4,6 +4,7 @@ odoo.define('web.CalendarRenderer', function (require) {
 var AbstractRenderer = require('web.AbstractRenderer');
 var CalendarPopover = require('web.CalendarPopover');
 var core = require('web.core');
+var config = require('web.config');
 var Dialog = require('web.Dialog');
 var field_utils = require('web.field_utils');
 var FieldManagerMixin = require('web.FieldManagerMixin');
@@ -350,9 +351,13 @@ return AbstractRenderer.extend({
     _eventRender: function (event) {
         var qweb_context = {
             event: event,
+            fields: this.state.fields,
+            format: this._format.bind(this),
+            isMobile: config.device.isMobile,
             record: event.extendedProps.record,
             color: this.getColor(event.extendedProps.color_index),
             showTime: !self.hideTime && event.extendedProps.showTime,
+            widget: this,
         };
         this.qweb_context = qweb_context;
         if (_.isEmpty(qweb_context.record)) {

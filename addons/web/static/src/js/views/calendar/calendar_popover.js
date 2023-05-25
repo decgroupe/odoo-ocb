@@ -6,6 +6,7 @@ const fieldRegistryOwl = require('web.field_registry_owl');
 const FieldWrapper = require('web.FieldWrapper');
 var StandaloneFieldManagerMixin = require('web.StandaloneFieldManagerMixin');
 var Widget = require('web.Widget');
+var pyUtils = require('web.py_utils');
 const { WidgetAdapterMixin } = require('web.OwlCompatibility');
 
 var CalendarPopover = Widget.extend(WidgetAdapterMixin, StandaloneFieldManagerMixin, {
@@ -107,14 +108,14 @@ var CalendarPopover = Widget.extend(WidgetAdapterMixin, StandaloneFieldManagerMi
         var fields = _.keys(this.displayFields);
         for (var i=0; i<fields.length; i++) {
             var fieldName = fields[i];
-            var displayFieldInfo = self.displayFields[fieldName] || {attrs: {invisible: 1}};
+            var displayFieldInfo = self.displayFields[fieldName] || {attrs: {popover_invisible: 1}};
             var fieldInfo = self.fields[fieldName];
             var field = {
                 name: fieldName,
                 string: displayFieldInfo.attrs.string || fieldInfo.string,
                 value: self.event.extendedProps.record[fieldName],
                 type: fieldInfo.type,
-                invisible: displayFieldInfo.attrs.invisible,
+                invisible: displayFieldInfo.attrs.popover_invisible && pyUtils.py_eval(displayFieldInfo.attrs.popover_invisible),
             };
             if (field.type === 'selection') {
                 field.selection = fieldInfo.selection;
