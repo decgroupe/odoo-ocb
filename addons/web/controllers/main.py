@@ -1813,7 +1813,7 @@ class Export(http.Controller):
             model, [f['name'] for f in export_fields_list])
 
         return [
-            {'name': field['name'], 'label': fields_data[field['name']]}
+            {'name': field['name'], 'label': fields_data[field['name']] +  ' (' + field['name'] + ')'}
             for field in export_fields_list
         ]
 

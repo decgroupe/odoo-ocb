@@ -247,8 +247,11 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
      */
     async update(params, options = {}) {
         const shouldReload = 'reload' in options ? options.reload : true;
+        console.log("handle-=", this.handle);
         if (shouldReload) {
-            this.handle = await this.dp.add(this.model.reload(this.handle, params));
+            var r = this.model.reload(this.handle, params);
+            this.handle = await this.dp.add(r);
+            console.log("handle+=", this.handle);
         }
         const localState = this.renderer.getLocalState();
         const state = this.model.get(this.handle, { withSampleData: true });

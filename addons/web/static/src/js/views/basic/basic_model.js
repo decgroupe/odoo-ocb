@@ -2244,6 +2244,9 @@ var BasicModel = AbstractModel.extend({
                 var field = fields[name];
                 var fieldInfo = fieldsInfo[name];
                 var key = prefix + name;
+                if (field === undefined) {
+                    console.warn("Undefined field", key, fieldInfo, fields);
+                }
                 onchangeSpec[key] = (field.onChange) || "";
                 if (field.onChange) {
                     hasOnchange = true;

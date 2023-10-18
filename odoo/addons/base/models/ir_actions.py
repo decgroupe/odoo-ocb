@@ -115,11 +115,11 @@ class IrActions(models.Model):
                 if action_model and not IrModelAccess.check(action_model, mode='read', raise_exception=False):
                     # the user won't be able to read records
                     _logger.warning("Model '%s' is not readable for %s, "
-                                    "action '%s' is ignored", 
-                                    action_model, 
-                                    self.env.user.name, 
+                                    "action '%s' is ignored",
+                                    action_model,
+                                    self.env.user.name,
                                     action.name)
-                    
+
                     sn_am = action_model.replace('.', '_')
                     print("eg: ./security/ir.model.access.csv")
                     print("id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink")
@@ -856,7 +856,10 @@ class IrActionsActClient(models.Model):
     def _compute_params(self):
         self_bin = self.with_context(bin_size=False, bin_size_params_store=False)
         for record, record_bin in zip(self, self_bin):
-            record.params = record_bin.params_store and safe_eval(record_bin.params_store, {'uid': self._uid})
+            try:
+                record.params = record_bin.params_store and safe_eval(record_bin.params_store, {'uid': self._uid})
+            except:
+                pass
 
     def _inverse_params(self):
         for record in self:

@@ -515,7 +515,11 @@ class IrActionsReport(models.Model):
         report_obj = self.env['ir.actions.report']
         conditions = [('report_name', '=', report_name)]
         context = self.env['res.users'].context_get()
-        return report_obj.with_context(context).sudo().search(conditions, limit=1)
+        return (
+            report_obj.with_context(context, active_test=False)
+            .sudo()
+            .search(conditions, limit=1)
+        )
 
     @api.model
     def get_barcode_check_digit(self, numeric_barcode):
