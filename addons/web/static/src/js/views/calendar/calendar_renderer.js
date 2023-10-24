@@ -473,7 +473,7 @@ return AbstractRenderer.extend({
                     element.find('.fc-content').after($('<div/>', {class: 'fc-bg'}));
                 }
 
-                if (view.type === 'dayGridMonth' && event.extendedProps.record) {
+                if (['timeGridWeek', 'dayGridMonth'].includes(view.type) && event.extendedProps.record) {
                     var start = event.extendedProps.r_start || event.start;
                     var end = event.extendedProps.r_end || event.end;
                     // Detect if the event occurs in just one day
@@ -483,7 +483,13 @@ return AbstractRenderer.extend({
                         // For month view: do not show background for non allday, single day events
                         element.addClass('o_cw_nobg');
                         if (event.extendedProps.showTime && !self.hideTime) {
-                            const displayTime = moment(start).clone().format(self._getDbTimeFormat());
+                            var displayTime = "";
+                            if (view.type === 'dayGridMonth') {
+                                displayTime = moment(start).clone().format(self._getDbTimeFormat());
+                            }
+                            else if (view.type === 'timeGridWeek') {
+                                displayTime = moment(start).clone().format(self._getDbTimeFormat()) + ' - ' + moment(end).clone().format(self._getDbTimeFormat());
+                            }
                             element.find('.fc-content .fc-time').text(displayTime);
                         }
                     }

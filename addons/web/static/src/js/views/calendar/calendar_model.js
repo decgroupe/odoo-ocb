@@ -767,7 +767,7 @@ return AbstractModel.extend({
             'attendees':attendees,
         };
 
-        if (!(this.mapping.all_day && evt[this.mapping.all_day]) && this.data.scale === 'month' && this.fields[this.mapping.date_start].type !== 'date') {
+        if (!(this.mapping.all_day && evt[this.mapping.all_day]) && ['week', 'month'].includes(this.data.scale) && this.fields[this.mapping.date_start].type !== 'date') {
             r.showTime = true;
         }
 
