@@ -177,12 +177,9 @@ Docs & License: https://fullcalendar.io/
                         '</div>' :
                     '') +
                 '</div>' +
-                /* TODO: write CSS for this
                 (isResizableFromStart ?
-                  '<div class="fc-resizer fc-start-resizer"></div>' :
-                  ''
-                  ) +
-                */
+                    '<div class="fc-resizer fc-start-resizer"></div>' :
+                    '') +
                 (isResizableFromEnd ?
                     '<div class="fc-resizer fc-end-resizer"></div>' :
                     '') +
