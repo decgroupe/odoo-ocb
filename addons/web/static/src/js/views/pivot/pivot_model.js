@@ -981,6 +981,11 @@ var PivotModel = AbstractModel.extend({
                     acc.push(measure);
                     return acc;
                 }
+                var field = self.fields[measure];
+                if (field === undefined) {
+                    console.warn("Undefined field", measure, self.fields);
+                    throw new Error("Undefined field "+ measure);
+                }
                 var type = self.fields[measure].type;
                 var groupOperator = self.fields[measure].group_operator;
                 if (type === 'many2one') {
