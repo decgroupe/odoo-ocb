@@ -336,10 +336,20 @@ eventHandler.modules.popover.button.update = function ($container, oStyle) {
             if (width) {
                 width = width[2];
             }
-            $container.find('button[data-event="resize"][data-value="auto"]').toggleClass("active", width !== "100%" && width !== "50%" && width !== "25%");
+            $container.find('button[data-event="resize"][data-value="auto"]').toggleClass("active", width === null);
             $container.find('button[data-event="resize"][data-value="1"]').toggleClass("active", width === "100%");
-            $container.find('button[data-event="resize"][data-value="0.5"]').toggleClass("active", width === "50%");
+            $container.find('button[data-event="resize"][data-value="0.80"]').toggleClass("active", width === "80%");
+            $container.find('button[data-event="resize"][data-value="0.75"]').toggleClass("active", width === "75%");
+            $container.find('button[data-event="resize"][data-value="0.60"]').toggleClass("active", width === "60%");
+            $container.find('button[data-event="resize"][data-value="0.50"]').toggleClass("active", width === "50%");
+            $container.find('button[data-event="resize"][data-value="0.45"]').toggleClass("active", width === "45%");
+            $container.find('button[data-event="resize"][data-value="0.40"]').toggleClass("active", width === "40%");
+            $container.find('button[data-event="resize"][data-value="0.35"]').toggleClass("active", width === "35%");
+            $container.find('button[data-event="resize"][data-value="0.30"]').toggleClass("active", width === "30%");
             $container.find('button[data-event="resize"][data-value="0.25"]').toggleClass("active", width === "25%");
+            $container.find('button[data-event="resize"][data-value="0.20"]').toggleClass("active", width === "20%");
+            $container.find('button[data-event="resize"][data-value="0.15"]').toggleClass("active", width === "15%");
+            $container.find('button[data-event="resize"][data-value="0.10"]').toggleClass("active", width === "10%");
 
 
             $container.find('button[data-event="imageShape"][data-value="shadow"]').toggleClass("active", $(oStyle.image).hasClass("shadow"));
