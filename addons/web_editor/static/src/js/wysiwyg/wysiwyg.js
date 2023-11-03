@@ -13,7 +13,7 @@ var Wysiwyg = Widget.extend({
     defaultOptions: {
         'focus': false,
         'toolbar': [
-            ['style', ['style']],
+            ['style', ['style', 'toggleClassDropdown']],
             ['font', ['bold', 'italic', 'underline', 'clear']],
             ['fontsize', ['fontsize']],
             ['color', ['color']],
