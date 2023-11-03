@@ -142,6 +142,26 @@ renderer.tplPopovers = function (lang, options) {
     $imagePopover.find('button[data-event="removeMedia"]').parent().remove();
     $imagePopover.find('button[data-event="floatMe"][data-value="none"]').remove();
 
+    // Resize (pixel) button
+    var $resizepixel = $('<div class="btn-group"/>');
+    $resizepixel.insertBefore($imagePopover.find('.btn-group:first'));
+    var dropdown_content = [
+        '<li><a class="dropdown-item" data-event="resizepx" href="#" data-value="128">'+_t('128px')+'</a></li>',
+        '<li><a class="dropdown-item" data-event="resizepx" href="#" data-value="256">'+_t('256px')+'</a></li>',
+        '<li><a class="dropdown-item" data-event="resizepx" href="#" data-value="384">'+_t('384px')+'</a></li>',
+        '<li><a class="dropdown-item" data-event="resizepx" href="#" data-value="448">'+_t('448px')+'</a></li>',
+        '<li><a class="dropdown-item" data-event="resizepx" href="#" data-value="512">'+_t('512px')+'</a></li>',
+        '<li><a class="dropdown-item" data-event="resizepx" href="#" data-value="640">'+_t('640px')+'</a></li>',
+        '<li><a class="dropdown-item" data-event="resizepx" href="#" data-value="768">'+_t('768px')+'</a></li>',
+        '<li><a class="dropdown-item" data-event="resizepx" href="#" data-value="1024">'+_t('1024px')+'</a></li>',
+        '<li><a class="dropdown-item" data-event="resizepx" href="#" data-value="1280">'+_t('1280px')+'</a></li>',
+        '<li><a class="dropdown-item" data-event="resizepx" href="#" data-value="1344">'+_t('1344px')+'</a></li>',
+    ];
+    $(tplIconButton('fa fa-shower', {
+        title: _t('Resize (px)'),
+        dropdown: tplDropdown(dropdown_content)
+    })).appendTo($resizepixel);
+
     // padding button
     var $padding = $('<div class="btn-group"/>');
     $padding.insertBefore($imagePopover.find('.btn-group:first'));
@@ -296,6 +316,22 @@ eventHandler.modules.popover.button.update = function ($container, oStyle) {
             $container.find('.d-none:not(.only_fa, .note-recent-color)').removeClass('d-none');
             $container.find('button[data-event="cropImage"]').removeClass('d-none');
             $container.find('.only_fa').addClass('d-none');
+
+            var widthpx = ($(oStyle.image).attr('style') || '').match(/(^|;|\s)width:\s*([0-9]+px)/);
+            if (widthpx) {
+                widthpx = widthpx[2];
+            }
+            $container.find('a[data-event="resizepx"][data-value="128"]').toggleClass("active", widthpx === "128px");
+            $container.find('a[data-event="resizepx"][data-value="256"]').toggleClass("active", widthpx === "256px");
+            $container.find('a[data-event="resizepx"][data-value="384"]').toggleClass("active", widthpx === "384px");
+            $container.find('a[data-event="resizepx"][data-value="448"]').toggleClass("active", widthpx === "448px");
+            $container.find('a[data-event="resizepx"][data-value="512"]').toggleClass("active", widthpx === "512px");
+            $container.find('a[data-event="resizepx"][data-value="640"]').toggleClass("active", widthpx === "640px");
+            $container.find('a[data-event="resizepx"][data-value="768"]').toggleClass("active", widthpx === "768px");
+            $container.find('a[data-event="resizepx"][data-value="1024"]').toggleClass("active", widthpx === "1024px");
+            $container.find('a[data-event="resizepx"][data-value="1280"]').toggleClass("active", widthpx === "1280px");
+            $container.find('a[data-event="resizepx"][data-value="1344"]').toggleClass("active", widthpx === "1344px");
+
             var width = ($(oStyle.image).attr('style') || '').match(/(^|;|\s)width:\s*([0-9]+%)/);
             if (width) {
                 width = width[2];
@@ -304,6 +340,7 @@ eventHandler.modules.popover.button.update = function ($container, oStyle) {
             $container.find('button[data-event="resize"][data-value="1"]').toggleClass("active", width === "100%");
             $container.find('button[data-event="resize"][data-value="0.5"]').toggleClass("active", width === "50%");
             $container.find('button[data-event="resize"][data-value="0.25"]').toggleClass("active", width === "25%");
+
 
             $container.find('button[data-event="imageShape"][data-value="shadow"]').toggleClass("active", $(oStyle.image).hasClass("shadow"));
 
@@ -418,6 +455,12 @@ eventHandler.modules.editor.resize = function ($editable, sValue) {
         width = width[2]/100;
     }
     $target.css('width', (width !== sValue && sValue !== "auto") ? (sValue * 100) + '%' : '');
+};
+eventHandler.modules.editor.resizepx = function ($editable, sValue) {
+    var $target = $(getImgTarget($editable));
+    $editable.data('NoteHistory').recordUndo();
+    var width = ($target.attr('style') || '').match(/(^|;|\s)width:\s*([0-9]+)px/);
+    $target.css('width', (width !== sValue && sValue !== "auto") ? (sValue) + 'px' : '');
 };
 eventHandler.modules.editor.resizefa = function ($editable, sValue) {
     var $target = $(getImgTarget($editable));
