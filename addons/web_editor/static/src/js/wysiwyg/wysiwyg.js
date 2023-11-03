@@ -21,6 +21,7 @@ var Wysiwyg = Widget.extend({
             ['table', ['table']],
             ['insert', ['link', 'picture']],
             ['history', ['undo', 'redo']],
+            ['view', ['fullscreen']],
         ],
         'styleWithSpan': false,
         'inlinemedia': ['p'],
