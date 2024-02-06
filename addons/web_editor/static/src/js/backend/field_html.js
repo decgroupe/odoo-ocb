@@ -228,7 +228,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
                 if (self.model === "mail.compose.message" || self.model === "mailing.mailing") {
                     options.noVideos = true;
                 }
-                options.prettifyHtml = false;
+                options.prettifyHtml = true;
                 return options;
             },
         });
