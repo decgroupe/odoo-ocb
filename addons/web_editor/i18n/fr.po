@@ -1554,7 +1554,7 @@ msgstr "Options de qualité non disponibles"
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:0
 #, python-format
 msgid "Quote"
-msgstr "Devis"
+msgstr "Citation"
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb
