@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        
+
         <record id="removal_fifo" model="product.removal">
             <field name="name">First In First Out (FIFO)</field>
             <field name="method">fifo</field>
@@ -42,6 +42,7 @@ for quant in quants:
         # should be 0.
         if quant.reserved_quantity != 0:
             logging += "Problematic quant found: %s (quantity: %s, reserved_quantity: %s)\n" % (quant.id, quant.quantity, quant.reserved_quantity)
+            logging += "==> %s > %s\n" % (quant.product_id, quant.product_id.display_name)
             logging += "its `reserved_quantity` field is not 0 while its location should bypass the reservation\n"
             if move_lines:
                 logging += "These move lines are reserved on it: %s (sum of the reservation: %s)\n" % (move_line_str, reserved_on_move_lines)
@@ -57,12 +58,14 @@ for quant in quants:
         if quant.reserved_quantity == 0:
             if move_lines:
                 logging += "Problematic quant found: %s (quantity: %s, reserved_quantity: %s)\n" % (quant.id, quant.quantity, quant.reserved_quantity)
+                logging += "==> %s > %s\n" % (quant.product_id, quant.product_id.display_name)
                 logging += "its `reserved_quantity` field is 0 while these move lines are reserved on it: %s (sum of the reservation: %s)\n" % (move_line_str, reserved_on_move_lines)
                 logging += '******************\n'
                 move_lines.with_context(bypass_reservation_update=True).sudo().write({'product_uom_qty': 0})
                 move_line_to_recompute_ids += move_lines.ids
         elif quant.reserved_quantity &lt; 0:
             logging += "Problematic quant found: %s (quantity: %s, reserved_quantity: %s)\n" % (quant.id, quant.quantity, quant.reserved_quantity)
+            logging += "==> %s > %s\n" % (quant.product_id, quant.product_id.display_name)
             logging += "its `reserved_quantity` field is negative while it should not happen\n"
             quant.write({'reserved_quantity': 0})
             if move_lines:
@@ -73,6 +76,7 @@ for quant in quants:
         else:
             if reserved_on_move_lines != quant.reserved_quantity:
                 logging += "Problematic quant found: %s (quantity: %s, reserved_quantity: %s)\n" % (quant.id, quant.quantity, quant.reserved_quantity)
+                logging += "==> %s > %s\n" % (quant.product_id, quant.product_id.display_name)
                 logging += "its `reserved_quantity` does not reflect the move lines reservation\n"
                 logging += "These move lines are reserved on it: %s (sum of the reservation: %s)\n" % (move_line_str, reserved_on_move_lines)
                 logging += '******************\n'
@@ -83,6 +87,7 @@ for quant in quants:
                 if any(move_line.product_qty &lt; 0 for move_line in
                        move_lines):
                     logging += "Problematic quant found: %s (quantity: %s, reserved_quantity: %s)\n" % (quant.id, quant.quantity, quant.reserved_quantity)
+                    logging += "==> %s > %s\n" % (quant.product_id, quant.product_id.display_name)
                     logging += "its `reserved_quantity` correctly reflects the move lines reservation but some are negatives\n"
                     logging += "These move lines are reserved on it: %s (sum of the reservation: %s)\n" % (move_line_str, reserved_on_move_lines)
                     logging += '******************\n'
@@ -99,6 +104,7 @@ move_lines_to_unreserve = []
 for move_line in move_lines:
     if not move_line.location_id.should_bypass_reservation():
         logging += "Problematic move line found: %s (reserved_quantity: %s)\n" % (move_line.id, move_line.product_qty)
+        logging += "==> move %s: %s > %s\n" % (move_line.move_id, move_line.product_id, move_line.product_id.display_name)
         logging += "There is no exiting quants despite its `reserved_quantity`\n"
         logging += '******************\n'
         move_lines_to_unreserve.append(move_line.id)
@@ -161,7 +167,7 @@ if move_line_to_recompute_ids:
             <field name="usage">customer</field>
             <field name="company_id"></field>
         </record>
-        
+
         <record id="stock_location_inter_wh" model="stock.location">
             <field name="name">Inter-company transit</field>
             <field name="location_id" ref="stock_location_locations_virtual"/>
@@ -175,7 +181,7 @@ if move_line_to_recompute_ids:
         <!--
              Stock rules
         -->
-        
+
         <!-- set a lower sequence on the mto route than on the resupply routes -->
         <record id="route_warehouse0_mto" model='stock.location.route'>
             <field name="name">Replenish on Order (MTO)</field>
