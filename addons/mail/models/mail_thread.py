@@ -902,6 +902,8 @@ class MailThread(models.AbstractModel):
 
         # compute references to find if message is a reply to an existing thread
         thread_references = message_dict['references'] or message_dict['in_reply_to']
+        if not thread_references:
+            thread_references = self._message_route_get_thread_references(message, message_dict)
         msg_references = [
             re.sub(r'[\r\n\t ]+', r'', ref)  # "Unfold" buggy references
             for ref in tools.mail_header_msgid_re.findall(thread_references)
@@ -1032,6 +1034,10 @@ class MailThread(models.AbstractModel):
             'Create an appropriate mail.alias or force the destination model.' %
             (email_from, email_to, message_id)
         )
+
+    @api.model
+    def _message_route_get_thread_references(self, message, message_dict):
+        return ''
 
     @api.model
     def _message_route_process(self, message, message_dict, routes):
