@@ -533,7 +533,7 @@
                                         </t>
                                     </div>
                                     <div>
-                                        <span t-if="record.partner_id.value" t-esc="record.partner_id.value"></span>
+                                        <small t-if="record.partner_id.value" t-esc="record.partner_id.value"></small>
                                     </div>
                                     <div>
                                         <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
