@@ -708,7 +708,7 @@ Or send your receipts at <a href="mailto:%(email)s?subject=Lunch%%20with%%20cust
         if expense.employee_id.user_id.partner_id:
             expense.message_post(
                 partner_ids=expense.employee_id.user_id.partner_id.ids,
-                subject='Re: %s' % msg_dict.get('subject', ''),
+                subject='%s' % msg_dict.get('subject', ''),
                 body=body,
                 subtype_id=self.env.ref('mail.mt_note').id,
                 email_layout_xmlid='mail.mail_notification_light',
@@ -718,7 +718,7 @@ Or send your receipts at <a href="mailto:%(email)s?subject=Lunch%%20with%%20cust
                 'email_from': self.env.user.email_formatted,
                 'author_id': self.env.user.partner_id.id,
                 'body_html': body,
-                'subject': 'Re: %s' % msg_dict.get('subject', ''),
+                'subject': '%s' % msg_dict.get('subject', ''),
                 'email_to': msg_dict.get('email_from', False),
                 'auto_delete': True,
                 'references': msg_dict.get('message_id'),
@@ -967,7 +967,7 @@ class HrExpenseSheet(models.Model):
 
             if not self.env.user in current_managers and not self.user_has_groups('hr_expense.group_hr_expense_user') and self.employee_id.expense_manager_id != self.env.user:
                 raise UserError(_("You can only approve your department expenses"))
-        
+
         notification = {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
@@ -987,7 +987,7 @@ class HrExpenseSheet(models.Model):
             'type': 'success',
             'next': {'type': 'ir.actions.act_window_close'},
         })
-            
+
         self.activity_update()
         return notification
 

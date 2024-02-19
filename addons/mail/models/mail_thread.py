@@ -670,7 +670,7 @@ class MailThread(models.AbstractModel):
         bounce_mail_values = {
             'author_id': False,
             'body_html': body_html,
-            'subject': 'Re: %s' % message.get('subject'),
+            'subject': '%s' % message.get('subject'),
             'email_to': bounce_to,
             'auto_delete': True,
         }
@@ -930,7 +930,7 @@ class MailThread(models.AbstractModel):
 
         # 0. Handle bounce: verify whether this is a bounced email and use it to collect bounce data and update notifications for customers
         #    Bounce regex: typical form of bounce is bounce_alias+128-crm.lead-34@domain
-        #       group(1) = the mail ID; group(2) = the model (if any); group(3) = the record ID 
+        #       group(1) = the mail ID; group(2) = the model (if any); group(3) = the record ID
         #    Bounce message (not alias)
         #       See http://datatracker.ietf.org/doc/rfc3462/?include_text=1
         #        As all MTA does not respect this RFC (googlemail is one of them),
@@ -1737,7 +1737,7 @@ class MailThread(models.AbstractModel):
             m2m_attachment_ids += [(4, id) for id in attachment_ids]
         # Handle attachments parameter, that is a dictionary of attachments
 
-        if attachments: # generate 
+        if attachments: # generate
             cids_in_body = set()
             names_in_body = set()
             cid_list = []
@@ -1831,7 +1831,7 @@ class MailThread(models.AbstractModel):
             :param str body: body of the message, usually raw HTML that will
                 be sanitized
             :param str subject: subject of the message
-            :param str message_type: see mail_message.message_type field. Can be anything but 
+            :param str message_type: see mail_message.message_type field. Can be anything but
                 user_notification, reserved for message_notify
             :param int parent_id: handle thread formation
             :param int subtype_id: subtype_id of the message, mainly use fore
@@ -2022,7 +2022,7 @@ class MailThread(models.AbstractModel):
     def message_notify(self, *,
                        partner_ids=False, parent_id=False, model=False, res_id=False,
                        author_id=None, email_from=None, body='', subject=False, **kwargs):
-        """ Shortcut allowing to notify partners of messages that shouldn't be 
+        """ Shortcut allowing to notify partners of messages that shouldn't be
         displayed on a document. It pushes notifications on inbox or by email depending
         on the user configuration, like other notifications. """
         if self:
@@ -2278,7 +2278,7 @@ class MailThread(models.AbstractModel):
             _logger.warning('QWeb template %s not found when sending notification emails. Sending without layouting.' % (template_xmlid))
             base_template = False
 
-        mail_subject = message.subject or (message.record_name and 'Re: %s' % message.record_name) # in cache, no queries
+        mail_subject = message.subject or (message.record_name and '%s' % message.record_name) # in cache, no queries
         # Replace new lines by spaces to conform to email headers requirements
         mail_subject = ' '.join((mail_subject or '').splitlines())
         # compute references: set references to the parent and add current message just to
@@ -2641,7 +2641,7 @@ class MailThread(models.AbstractModel):
             'button_access': {'title': 'View Simple Chatter Model',
                             'url': '/mail/view?model=mail.test.simple&res_id=1497'},
             'has_button_access': False,
-            'recipients': [4, 5, 6] 
+            'recipients': [4, 5, 6]
         },
         {
             'actions': [],
@@ -2887,7 +2887,7 @@ class MailThread(models.AbstractModel):
 
         new_partners, new_channels = dict(), dict()
 
-        # return data related to auto subscription based on subtype matching (aka: 
+        # return data related to auto subscription based on subtype matching (aka:
         # default task subtypes or subtypes from project triggering task subtypes)
         updated_relation = dict()
         child_ids, def_ids, all_int_ids, parent, relation = self.env['mail.message.subtype']._get_auto_subscription_subtypes(self._name)

@@ -434,7 +434,7 @@ class Channel(models.Model):
                 'author_id': self.env.user.partner_id.id,
                 'email_from': self.env.user.company_id.catchall_formatted or self.env.user.company_id.email_formatted,
                 'body_html': self.moderation_notify_msg,
-                'subject': 'Re: %s' % (kwargs.get('subject', '')),
+                'subject': '%s' % (kwargs.get('subject', '')),
                 'email_to': email,
                 'auto_delete': True,
                 'state': 'outgoing'
