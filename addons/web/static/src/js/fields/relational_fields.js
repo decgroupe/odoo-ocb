@@ -105,7 +105,7 @@ var FieldMany2One = AbstractField.extend({
         'click .o_external_button': '_onExternalButtonClick',
         'click': '_onClick',
     }),
-    AUTOCOMPLETE_DELAY: 200,
+    AUTOCOMPLETE_DELAY: 400,
     SEARCH_MORE_LIMIT: 320,
 
     /**
