@@ -326,7 +326,7 @@ class IrMailServer(models.Model):
             headers.setdefault('Return-Path', return_path)
 
         del msg['Reply-To']
-        msg['Reply-To'] = reply_to or email_from
+        msg['Reply-To'] = [reply_to, email_from]
         msg['To'] = email_to
         if email_cc:
             msg['Cc'] = email_cc
