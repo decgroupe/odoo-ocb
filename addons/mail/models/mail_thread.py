@@ -2529,6 +2529,7 @@ class MailThread(models.AbstractModel):
             email_from = msg_vals.get('email_from') or message.email_from
             email_from = self.env['res.partner']._parse_partner_name(email_from)[1]
             exept_partner = [r['id'] for r in recipient_data['partners']]
+            exept_partner.append(0)
             if author_id:
                 exept_partner.append(author_id)
 
